@@ -17,7 +17,7 @@ func (s StargateProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker) StargateProxy {
 	r := mux.NewRouter()
 
-	routes := l.ListALl()
+	routes := l.ListAll()
 	for route, svc := range routes {
 		lb := loadBalancerMaker()
 		lb.InitRoutes(svc)
