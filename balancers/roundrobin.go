@@ -1,31 +1,23 @@
 package balancers
 
 import (
-	"github.com/realbucksavage/stargate"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+
+	"github.com/realbucksavage/stargate"
 )
 
+// RoundRobin implements the round-robin load balancing algorithm
 type RoundRobin struct {
 	servers []*stargate.DownstreamServer
 	latest  int
 }
 
-func (r *RoundRobin) NextServer() *stargate.DownstreamServer {
-	if len(r.servers) == 0 {
-		return nil
-	}
+func (r *RoundRobin) InitRoutes(svc []string) {
+	r.servers = []*stargate.DownstreamServer{}
 
-	i := (r.latest + 1) % len(r.servers)
-	r.latest = i
-
-	return r.servers[i]
-}
-
-func NewRoundRobinBalancer(servers []string) *RoundRobin {
-	rb := RoundRobin{}
-	for _, s := range servers {
+	for _, s := range svc {
 		var localServer stargate.DownstreamServer
 
 		origin, _ := url.Parse(s)
@@ -41,9 +33,18 @@ func NewRoundRobinBalancer(servers []string) *RoundRobin {
 			Director: director,
 		}
 
-		rb.servers = append(rb.servers, &localServer)
+		r.servers = append(r.servers, &localServer)
 	}
-	rb.latest = -1
+	r.latest = -1
+}
 
-	return &rb
+func (r *RoundRobin) NextServer() *stargate.DownstreamServer {
+	if len(r.servers) == 0 {
+		return nil
+	}
+
+	i := (r.latest + 1) % len(r.servers)
+	r.latest = i
+
+	return r.servers[i]
 }
