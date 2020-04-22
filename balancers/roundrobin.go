@@ -2,7 +2,6 @@ package balancers
 
 import (
 	"github.com/realbucksavage/stargate"
-	"net/http"
 	"net/http/httputil"
 	"net/url"
 )
@@ -13,6 +12,7 @@ type RoundRobin struct {
 	latest  int
 }
 
+// NextServer returns the next server that should serve the request.
 func (r *RoundRobin) NextServer() *stargate.DownstreamServer {
 	if len(r.servers) == 0 {
 		return nil
@@ -24,6 +24,7 @@ func (r *RoundRobin) NextServer() *stargate.DownstreamServer {
 	return r.servers[i]
 }
 
+// MakeRoundRobin creates new instance of RoundRobin with the passed addresses as backend servers.
 func MakeRoundRobin(svc []string) (stargate.LoadBalancer, error) {
 	r := RoundRobin{}
 
@@ -37,13 +38,7 @@ func MakeRoundRobin(svc []string) (stargate.LoadBalancer, error) {
 			return nil, err
 		}
 
-		director := func(r *http.Request) {
-			r.Header.Add("X-Forwarded-For", r.Host)
-			r.Header.Add("X-Origin-Host", origin.Host)
-			r.URL.Scheme = "http"
-
-			r.URL.Host = origin.Host
-		}
+		director := directorFunc(origin)
 		localServer.Alive = localServer.IsAlive()
 		localServer.Backend = &httputil.ReverseProxy{
 			Director: director,
