@@ -14,6 +14,10 @@ func (s Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
+func (s Proxy) UseMiddleware(mw func(http.Handler) http.Handler) {
+	s.mux.Use(mw)
+}
+
 func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker) (Proxy, error) {
 	r := mux.NewRouter()
 
