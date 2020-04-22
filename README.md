@@ -1,6 +1,6 @@
 # Stargate
 
-A lightweight, extendable, blazing fast reverse proxy load balancer.
+A lightweight, extendable, and blazing fast API Gateway
 
 ## Specs
 
@@ -12,10 +12,14 @@ func main() {
 	l := listers.StaticLister{
 		Routes: map[string][]string{
 			"/":    {"http://localhost:8081", "http://localhost:8082"},
-			"/api": {"http://localhost:8083"},
+			"/api": {"https://jsonplaceholder.typicode.com/posts"},
 		},
 	}
-	sg := stargate.NewProxy(l, func() stargate.LoadBalancer { return &balancers.RoundRobin{} })
+	sg, err := stargate.NewProxy(l, balancers.MakeRoundRobin)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	http.Handle("/", sg)
 	log.Fatal(http.ListenAndServe(":7000", nil))
 }
@@ -41,7 +45,7 @@ func (s BackendServer) IsAlive() bool {
 ```go
 type ServiceLister interface {
 	List(string) []string
-	ListALl() map[string][]string
+	ListAll() map[string][]string
 }
 ```
 
@@ -53,7 +57,6 @@ type ServiceLister interface {
 
 ```go
 type LoadBalancer interface {
-	InitRoutes(svc []string)
 	NextServer() *DownstreamServer
 }
 ```
