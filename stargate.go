@@ -6,25 +6,28 @@ import (
 	"net/http"
 )
 
-type StargateProxy struct {
+type Proxy struct {
 	mux *mux.Router
 }
 
-func (s StargateProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker) StargateProxy {
+func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker) (Proxy, error) {
 	r := mux.NewRouter()
 
 	routes := l.ListAll()
 	for route, svc := range routes {
-		lb := loadBalancerMaker()
-		lb.InitRoutes(svc)
+		lb, err := loadBalancerMaker(svc)
+		if err != nil {
+			return Proxy{}, err
+		}
+
 		r.HandleFunc(route, serve(lb))
 	}
 
-	return StargateProxy{mux: r}
+	return Proxy{mux: r}, nil
 }
 
 func serve(lb LoadBalancer) func(w http.ResponseWriter, r *http.Request) {
