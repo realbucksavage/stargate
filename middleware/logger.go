@@ -1,22 +1,29 @@
 package middleware
 
 import (
-	"github.com/realbucksavage/stargate"
 	"io"
 	"net/http"
 	"os"
 	"time"
 
-	logger "github.com/mgutz/logxi/v1"
+	"github.com/realbucksavage/stargate"
+
+	log "github.com/op/go-logging"
+)
+
+const (
+	loggerName = "stargate-requests"
 )
 
 var (
 	defaultWriter = os.Stdout
+	defaultLevel  = log.INFO
 )
 
 type (
-	loggerConfig struct {
-		out io.Writer
+	LoggerConfig struct {
+		Out   io.Writer
+		Level log.Level
 	}
 
 	loggingResponseWriter struct {
@@ -31,19 +38,24 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 }
 
 func LoggingMiddleware() stargate.MiddlewareFunc {
-	return loggerWithConfig(loggerConfig{})
+	return LoggerWithConfig(LoggerConfig{})
 }
 
 func LoggerWithOutput(w io.Writer) stargate.MiddlewareFunc {
-	return loggerWithConfig(loggerConfig{out: w})
+	return LoggerWithConfig(LoggerConfig{Out: w})
 }
 
-func loggerWithConfig(conf loggerConfig) stargate.MiddlewareFunc {
-	if conf.out == nil {
-		conf.out = defaultWriter
+func LoggerWithConfig(conf LoggerConfig) stargate.MiddlewareFunc {
+	if conf.Out == nil {
+		conf.Out = defaultWriter
 	}
 
-	l := logger.NewLogger(conf.out, "stargate-requests")
+	if conf.Level == 0 {
+		conf.Level = defaultLevel
+	}
+
+	l := log.MustGetLogger(loggerName)
+	log.SetLevel(conf.Level, loggerName)
 
 	return func(ctx *stargate.Context) func(http.Handler) http.Handler {
 		return func(handler http.Handler) http.Handler {
@@ -54,7 +66,11 @@ func loggerWithConfig(conf loggerConfig) stargate.MiddlewareFunc {
 				lrw := &loggingResponseWriter{w, http.StatusOK}
 				handler.ServeHTTP(lrw, r)
 
-				l.Info("[%d | %s] %s %d ms", lrw.status, r.Method, time.Now().Sub(start).Milliseconds())
+				l.Infof("[%s | %d] %s\t\t(%dms))",
+					r.Method,
+					lrw.status,
+					r.RequestURI,
+					time.Now().Sub(start).Milliseconds())
 
 			})
 		}
