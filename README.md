@@ -55,5 +55,6 @@ func headerAddingMiddleware(ctx *stargate.Context) func(http.Handler) http.Handl
 
 ## Open TODOs
 
+- Make `Middleware`'s implementation better
 - Make `LoadBalancer` aware of changes in downstream server list
 - Implement a Eureka Client
