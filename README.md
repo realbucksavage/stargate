@@ -1,18 +1,29 @@
 # Stargate
 
-A lightweight, extendable, and blazing fast API Gateway
+A lightweight, extendable, and blazing fast API Gateway.
 
-## Specs
-
-Running basic program
+## Basics
 
 ```go
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/realbucksavage/stargate"
+	"github.com/realbucksavage/stargate/balancers"
+	"github.com/realbucksavage/stargate/listers"
+
+	mw "github.com/realbucksavage/stargate/middleware"
+)
+
 func main() {
 
 	l := listers.StaticLister{
 		Routes: map[string][]string{
-			"/":    {"http://localhost:8081", "http://localhost:8082"},
-			"/api": {"https://jsonplaceholder.typicode.com/posts"},
+			"/downstream_1":    {"http://localhost:8081", "http://localhost:8082"},
+			"/downstream_2":    {"http://localhost:8083"},
 		},
 	}
 	sg, err := stargate.NewProxy(l, balancers.MakeRoundRobin)
@@ -20,49 +31,29 @@ func main() {
 		log.Fatal(err)
 	}
 
+	sg.UseMiddleware(mw.LoggingMiddleware())
+
 	http.Handle("/", sg)
 	log.Fatal(http.ListenAndServe(":7000", nil))
 }
 ```
 
-### Backends
+### Custom middleware
 
 ```go
-type DownstreamServer struct {
-    Backend httputil.ReverseProxy
-    HealthURL string
-    Alive bool
-}
+func headerAddingMiddleware(ctx *stargate.Context) func(http.Handler) http.Handler {
 
-func (s BackendServer) IsAlive() bool {
-    // Check for server health
-    return true
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			ctx.AddHeader("Test", "Abcd1234")
+			h.ServeHTTP(w, r)
+		})
+	}
 }
 ```
 
-### Backend list providers
+## Open TODOs
 
-```go
-type ServiceLister interface {
-	List(string) []string
-	ListAll() map[string][]string
-}
-```
-
-#### Static
-
-#### Eureka Discovery
-
-### Load Balancers
-
-```go
-type LoadBalancer interface {
-	NextServer() *DownstreamServer
-}
-```
-
-#### Round-Robin
-
-### Middlewares
-
-### SSL Termination
+- Make `LoadBalancer` aware of changes in downstream server list
+- Implement a Eureka Client
