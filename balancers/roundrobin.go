@@ -25,7 +25,7 @@ func (r *RoundRobin) NextServer() *stargate.DownstreamServer {
 }
 
 // MakeRoundRobin creates new instance of RoundRobin with the passed addresses as backend servers.
-func MakeRoundRobin(svc []string) (stargate.LoadBalancer, error) {
+func MakeRoundRobin(ctx *stargate.Context, svc []string) (stargate.LoadBalancer, error) {
 	r := RoundRobin{}
 
 	r.servers = []*stargate.DownstreamServer{}
@@ -38,7 +38,7 @@ func MakeRoundRobin(svc []string) (stargate.LoadBalancer, error) {
 			return nil, err
 		}
 
-		director := directorFunc(origin)
+		director := directorFunc(ctx, origin)
 		localServer.Alive = localServer.IsAlive()
 		localServer.Backend = &httputil.ReverseProxy{
 			Director: director,

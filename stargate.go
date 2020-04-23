@@ -8,22 +8,26 @@ import (
 
 type Proxy struct {
 	mux *mux.Router
+	ctx *Context
 }
+
+type MiddlewareFunc func(*Context) func(http.Handler) http.Handler
 
 func (s Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-func (s Proxy) UseMiddleware(mw func(http.Handler) http.Handler) {
-	s.mux.Use(mw)
+func (s Proxy) UseMiddleware(mw MiddlewareFunc) {
+	s.mux.Use(mw(s.ctx))
 }
 
 func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker) (Proxy, error) {
 	r := mux.NewRouter()
+	ctx := &Context{}
 
 	routes := l.ListAll()
 	for route, svc := range routes {
-		lb, err := loadBalancerMaker(svc)
+		lb, err := loadBalancerMaker(ctx, svc)
 		if err != nil {
 			return Proxy{}, err
 		}
@@ -31,11 +35,10 @@ func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker) (Proxy, erro
 		r.HandleFunc(route, serve(lb))
 	}
 
-	return Proxy{mux: r}, nil
+	return Proxy{mux: r, ctx: ctx}, nil
 }
 
 func serve(lb LoadBalancer) func(w http.ResponseWriter, r *http.Request) {
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		server := lb.NextServer()
 		if server == nil {
