@@ -40,7 +40,17 @@ func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker) (Proxy, erro
 
 func serve(lb LoadBalancer) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		server := lb.NextServer()
+		var server *DownstreamServer
+
+		serverCount := 0
+		for sv := lb.NextServer(); serverCount < lb.Length(); sv = lb.NextServer() {
+			if sv != nil && sv.IsAlive() {
+				server = sv
+				break
+			}
+			serverCount++
+		}
+
 		if server == nil {
 			w.Header().Add("Content-Type", "text/html")
 			w.WriteHeader(http.StatusServiceUnavailable)

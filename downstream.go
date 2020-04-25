@@ -1,12 +1,19 @@
 package stargate
 
-import "net/http/httputil"
+import (
+	"net/http"
+	"net/http/httputil"
+	"time"
+)
 
 // DownstreamServer is a backend service to connect downstream
 // TODO : Add health checking
 type DownstreamServer struct {
+	BaseURL string
 	Backend *httputil.ReverseProxy
 	Alive   bool
+
+	lastAlive time.Time
 }
 
 // ServiceLister provides all available routes and their downstream services
@@ -16,8 +23,17 @@ type ServiceLister interface {
 }
 
 // IsAlive performs a healthcheck on the server and returns true if the server responds back
-// TODO: This could be a scheduled task.
 func (d DownstreamServer) IsAlive() bool {
-	// TODO: Implementation
+	if time.Since(d.lastAlive).Seconds() < 30.0 {
+		return true
+	}
+	_, err := http.Get(d.BaseURL)
+	if err != nil {
+		return false
+	}
+
+	// TODO : Ignore status check for now.
+	d.lastAlive = time.Now()
 	return true
+
 }
