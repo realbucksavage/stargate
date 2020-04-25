@@ -26,7 +26,7 @@ func main() {
 			"/downstream_2":    {"http://localhost:8083"},
 		},
 	}
-	sg, err := stargate.NewProxy(l, balancers.MakeRoundRobin)
+	sg, err := stargate.NewProxy(l, balancers.RoundRobin)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -6,14 +6,13 @@ import (
 	"net/url"
 )
 
-// RoundRobin implements the round-robin load balancing algorithm
-type RoundRobin struct {
+type roundRobinBalancer struct {
 	servers []*stargate.DownstreamServer
 	latest  int
 }
 
 // NextServer returns the next server that should serve the request.
-func (r *RoundRobin) NextServer() *stargate.DownstreamServer {
+func (r *roundRobinBalancer) NextServer() *stargate.DownstreamServer {
 	if len(r.servers) == 0 {
 		return nil
 	}
@@ -24,9 +23,9 @@ func (r *RoundRobin) NextServer() *stargate.DownstreamServer {
 	return r.servers[i]
 }
 
-// MakeRoundRobin creates new instance of RoundRobin with the passed addresses as backend servers.
-func MakeRoundRobin(ctx *stargate.Context, svc []string) (stargate.LoadBalancer, error) {
-	r := RoundRobin{}
+// RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
+func RoundRobin(ctx *stargate.Context, svc []string) (stargate.LoadBalancer, error) {
+	r := roundRobinBalancer{}
 
 	r.servers = []*stargate.DownstreamServer{}
 
