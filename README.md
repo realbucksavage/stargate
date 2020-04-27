@@ -20,11 +20,11 @@ func main() {
 
 	l := listers.StaticLister{
 		Routes: map[string][]string{
-			"/downstream_1":    {"http://localhost:8081", "http://localhost:8082"},
-			"/downstream_2":    {"http://localhost:8083"},
+			"/downstream_1": {"http://localhost:8081", "http://localhost:8082"},
+			"/downstream_2": {"http://localhost:8083"},
 		},
 	}
-    ctx := stargate.NewContext()
+	ctx := stargate.NewContext()
 	sg, err := stargate.NewProxy(ctx, l, balancers.RoundRobin)
 	if err != nil {
 		log.Fatal(err)
@@ -49,13 +49,14 @@ You can create your middleware and pass them to `NewProxy` like this:
 package main
 
 import (
-    "github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/balancers"
 	"net/http"
+
+	"github.com/realbucksavage/stargate"
+	"github.com/realbucksavage/stargate/balancers"
 )
 
 func main() {
-    // declare a context and a lister
+	// declare a context and a lister
 	sg, err := stargate.NewProxy(ctx, lister, balancers.RoundRobin, myMiddleware)
 }
 
@@ -73,13 +74,13 @@ There is a middleware that logs all requests in the `middlware` package
 package main
 
 import (
-    "github.com/realbucksavage/stargate"
-    "github.com/realbucksavage/stargate/balancers"
-    mw "github.com/realbucksavage/stargate/middleware"
+	"github.com/realbucksavage/stargate"
+	"github.com/realbucksavage/stargate/balancers"
+	mw "github.com/realbucksavage/stargate/middleware"
 )
 
 func main() {
-    stargate.NewProxy(ctx, lister, balancers.RoundRobin, mw.LoggingMiddleware())
+	stargate.NewProxy(ctx, lister, balancers.RoundRobin, myMiddleware, mw.LoggingMiddleware())
 }
 ```
 
