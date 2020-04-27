@@ -65,7 +65,7 @@ func LoggerWithConfig(conf LoggerConfig) stargate.Middleware {
 			lrw := &loggingResponseWriter{w, http.StatusOK}
 			next.ServeHTTP(lrw, r)
 
-			l.Infof("[%s | %d] %s\t\t(%dms))",
+			l.Infof("[%s | %d] %s\t\t(%dms)",
 				r.Method,
 				lrw.status,
 				r.RequestURI,
