@@ -28,7 +28,7 @@ func (r *roundRobinBalancer) Length() int {
 }
 
 // RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
-func RoundRobin(ctx *stargate.Context, svc []string) (stargate.LoadBalancer, error) {
+func RoundRobin(svc []string, director stargate.DirectorFunc) (stargate.LoadBalancer, error) {
 	r := roundRobinBalancer{}
 
 	r.servers = []*stargate.DownstreamServer{}
@@ -41,11 +41,10 @@ func RoundRobin(ctx *stargate.Context, svc []string) (stargate.LoadBalancer, err
 			return nil, err
 		}
 
-		director := directorFunc(ctx, origin)
 		localServer.BaseURL = s
 		localServer.Alive = localServer.IsAlive()
 		localServer.Backend = &httputil.ReverseProxy{
-			Director: director,
+			Director: director(origin),
 		}
 
 		r.servers = append(r.servers, &localServer)

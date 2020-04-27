@@ -14,8 +14,6 @@ import (
 	"github.com/realbucksavage/stargate"
 	"github.com/realbucksavage/stargate/balancers"
 	"github.com/realbucksavage/stargate/listers"
-
-	mw "github.com/realbucksavage/stargate/middleware"
 )
 
 func main() {
@@ -26,36 +24,67 @@ func main() {
 			"/downstream_2":    {"http://localhost:8083"},
 		},
 	}
-	sg, err := stargate.NewProxy(l, balancers.RoundRobin)
+    ctx := stargate.NewContext()
+	sg, err := stargate.NewProxy(ctx, l, balancers.RoundRobin)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	sg.UseMiddleware(mw.LoggingMiddleware())
 
 	http.Handle("/", sg)
 	log.Fatal(http.ListenAndServe(":7000", nil))
 }
 ```
 
-### Custom middleware
+### Middleware
+
+A middleware is a function that is defined like this
 
 ```go
-func headerAddingMiddleware(ctx *stargate.Context) func(http.Handler) http.Handler {
+type Middleware func(*Context, http.Handler) http.HandlerFunc
+```
 
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+You can create your middleware and pass them to `NewProxy` like this:
 
-			ctx.AddHeader("Test", "Abcd1234")
-			h.ServeHTTP(w, r)
-		})
-	}
+```go
+package main
+
+import (
+    "github.com/realbucksavage/stargate"
+	"github.com/realbucksavage/stargate/balancers"
+	"net/http"
+)
+
+func main() {
+    // declare a context and a lister
+	sg, err := stargate.NewProxy(ctx, lister, balancers.RoundRobin, myMiddleware)
+}
+
+func myMiddleware(ctx *stargate.Context, next http.Handler) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Some code here
+		next.ServeHTTP(w, r)
+	})
+}
+```
+
+There is a middleware that logs all requests in the `middlware` package
+
+```go
+package main
+
+import (
+    "github.com/realbucksavage/stargate"
+    "github.com/realbucksavage/stargate/balancers"
+    mw "github.com/realbucksavage/stargate/middleware"
+)
+
+func main() {
+    stargate.NewProxy(ctx, lister, balancers.RoundRobin, mw.LoggingMiddleware())
 }
 ```
 
 ## Open TODOs
 
-- Make `Middleware`'s implementation better
 - Make `LoadBalancer` aware of changes in downstream server list
 - Write tests
 - Implement a Eureka Client

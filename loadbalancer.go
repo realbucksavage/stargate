@@ -5,4 +5,4 @@ type LoadBalancer interface {
 	Length() int
 }
 
-type LoadBalancerMaker func(*Context, []string) (LoadBalancer, error)
+type LoadBalancerMaker func([]string, DirectorFunc) (LoadBalancer, error)

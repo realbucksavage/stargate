@@ -9,13 +9,16 @@ type Context struct {
 }
 
 func (c *Context) AddHeader(header, value string) {
-	if c.headers == nil {
-		c.headers = map[string]string{}
-	}
-
 	c.headers[header] = value
 }
 
-func (c *Context) GetHeaders() map[string]string {
-	return c.headers
+func NewContext() *Context {
+	return WithContext(context.Background())
+}
+
+func WithContext(ctx context.Context) *Context {
+	return &Context{
+		Context: ctx,
+		headers: map[string]string{},
+	}
 }
