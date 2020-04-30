@@ -64,6 +64,8 @@ func serve(lb LoadBalancer) func(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+
+		Logger.Debugf("Resolved backend %s", server.BaseURL)
 		server.Backend.ServeHTTP(w, r)
 	}
 }
