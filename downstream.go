@@ -27,8 +27,10 @@ func (d DownstreamServer) IsAlive() bool {
 	if time.Since(d.lastAlive).Seconds() < 30.0 {
 		return true
 	}
+
 	_, err := http.Get(d.BaseURL)
 	if err != nil {
+		Logger.Errorf("Alive-check failed for server %s : %v", d.BaseURL, err)
 		return false
 	}
 
