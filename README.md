@@ -24,8 +24,7 @@ func main() {
 			"/downstream_2": {"http://localhost:8083"},
 		},
 	}
-	ctx := stargate.NewContext()
-	sg, err := stargate.NewProxy(ctx, l, balancers.RoundRobin)
+	sg, err := stargate.NewProxy(l, balancers.RoundRobin)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +56,7 @@ import (
 
 func main() {
 	// declare a context and a lister
-	sg, err := stargate.NewProxy(ctx, lister, balancers.RoundRobin, myMiddleware)
+	sg, err := stargate.NewProxy(lister, balancers.RoundRobin, myMiddleware)
 }
 
 func myMiddleware(ctx *stargate.Context, next http.Handler) http.HandlerFunc {
@@ -80,7 +79,7 @@ import (
 )
 
 func main() {
-	stargate.NewProxy(ctx, lister, balancers.RoundRobin, myMiddleware, mw.LoggingMiddleware())
+	stargate.NewProxy(lister, balancers.RoundRobin, myMiddleware, mw.LoggingMiddleware())
 }
 ```
 

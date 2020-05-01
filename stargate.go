@@ -49,8 +49,9 @@ func (s *Proxy) Reload() {
 	s.mutex.Unlock()
 }
 
-func NewProxy(ctx *Context, l ServiceLister, loadBalancerMaker LoadBalancerMaker, mwf ...Middleware) (Proxy, error) {
+func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker, mwf ...Middleware) (Proxy, error) {
 	r := mux.NewRouter()
+	ctx := &Context{}
 
 	routes := l.ListAll()
 	bm := map[string]LoadBalancer{}
