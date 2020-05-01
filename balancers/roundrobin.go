@@ -27,7 +27,17 @@ func (r *roundRobinBalancer) Length() int {
 	return len(r.servers)
 }
 
-func (r *roundRobinBalancer) UpdateRoutes(svc []string, director stargate.DirectorFunc) error {
+// RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
+func RoundRobin(svc []string, director stargate.DirectorFunc) (stargate.LoadBalancer, error) {
+	r := &roundRobinBalancer{}
+	if err := r.createRoutes(svc, director); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func (r *roundRobinBalancer) createRoutes(svc []string, director stargate.DirectorFunc) error {
 	r.servers = []*stargate.DownstreamServer{}
 
 	for _, s := range svc {
@@ -41,16 +51,6 @@ func (r *roundRobinBalancer) UpdateRoutes(svc []string, director stargate.Direct
 	r.latest = -1
 
 	return nil
-}
-
-// RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
-func RoundRobin(svc []string, director stargate.DirectorFunc) (stargate.LoadBalancer, error) {
-	r := &roundRobinBalancer{}
-	if err := r.UpdateRoutes(svc, director); err != nil {
-		return nil, err
-	}
-
-	return r, nil
 }
 
 func createProxy(s string, director stargate.DirectorFunc) (stargate.DownstreamServer, error) {

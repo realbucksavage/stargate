@@ -3,6 +3,7 @@ package stargate
 import (
 	"github.com/gorilla/mux"
 	"net/http"
+	"sync"
 )
 
 type Proxy struct {
@@ -12,31 +13,25 @@ type Proxy struct {
 	ctx           *Context
 	middleware    []Middleware
 	balancers     map[string]LoadBalancer
+
+	mutex sync.Mutex
 }
 
 type Middleware func(*Context, http.Handler) http.HandlerFunc
 
-func (s Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mutex.Lock()
 	s.mux.ServeHTTP(w, r)
+	s.mutex.Unlock()
 }
 
-func (s Proxy) Reload() {
+func (s *Proxy) Reload() {
 
 	rtr := mux.NewRouter()
 	routes := s.lister.ListAll()
 	for route, svc := range routes {
-		lb := s.balancers[route]
-		if lb != nil {
-			if err := lb.UpdateRoutes(svc, defaultDirector(s.ctx)); err != nil {
-				Logger.Errorf("Route %s not updated : %v", route, err)
-				continue
-			}
-			Logger.Debugf("Route %s updated", route)
 
-			continue
-		}
-
-		lb, err := s.balancerMaker(svc, defaultDirector(s.ctx))
+		lb, err := s.balancerMaker(svc, defaultDirector(s.ctx, route))
 		if err != nil {
 			Logger.Errorf("Cannot create a loadBalancer for route %s : %v", route, err)
 			continue
@@ -44,14 +39,14 @@ func (s Proxy) Reload() {
 		s.balancers[route] = lb
 
 		handler := createHandler(s.ctx, lb, s.middleware)
-		//rtr.HandleFunc(route, handler)
-
 		rtr.NewRoute().Path(route).Handler(handler)
 
-		Logger.Infof("New route added - %s", route)
+		Logger.Infof("Route created - %s", route)
 	}
 
+	s.mutex.Lock()
 	s.mux = rtr
+	s.mutex.Unlock()
 }
 
 func NewProxy(ctx *Context, l ServiceLister, loadBalancerMaker LoadBalancerMaker, mwf ...Middleware) (Proxy, error) {
@@ -60,7 +55,7 @@ func NewProxy(ctx *Context, l ServiceLister, loadBalancerMaker LoadBalancerMaker
 	routes := l.ListAll()
 	bm := map[string]LoadBalancer{}
 	for route, svc := range routes {
-		lb, err := loadBalancerMaker(svc, defaultDirector(ctx))
+		lb, err := loadBalancerMaker(svc, defaultDirector(ctx, route))
 		if err != nil {
 			Logger.Errorf("Cannot create a loadBalancer for route %s : %v", route, err)
 			return Proxy{}, err
