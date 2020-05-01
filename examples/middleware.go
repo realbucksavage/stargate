@@ -6,6 +6,7 @@ import (
 	"github.com/realbucksavage/stargate/listers"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func main() {
@@ -15,10 +16,19 @@ func main() {
 			"/ds_2": {"http://app2-sv1:8080"},
 		},
 	}
-	sg, err := stargate.NewProxy(l, balancers.RoundRobin)
+	sg, err := stargate.NewProxy(l, balancers.RoundRobin, someMiddleware)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Fatal(http.ListenAndServe(":8080", &sg))
+}
+
+func someMiddleware(c *stargate.Context, next http.Handler) http.HandlerFunc {
+	count := 0
+	return func(w http.ResponseWriter, r *http.Request) {
+		c.AddHeader("X-Hit-Count", strconv.Itoa(count))
+		next.ServeHTTP(w, r)
+		count++
+	}
 }
