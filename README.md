@@ -30,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.Handle("/", sg)
+	http.Handle("/", &sg)
 	log.Fatal(http.ListenAndServe(":7000", nil))
 }
 ```
