@@ -7,7 +7,6 @@ import (
 )
 
 // DownstreamServer is a backend service to connect downstream
-// TODO : Add health checking
 type DownstreamServer struct {
 	BaseURL string
 	Backend *httputil.ReverseProxy
@@ -22,7 +21,9 @@ type ServiceLister interface {
 	ListAll() map[string][]string
 }
 
-// IsAlive performs a healthcheck on the server and returns true if the server responds back
+// IsAlive performs a healthcheck on the server and returns true if the server responds back. If a server responds to
+// an initial healthcheck request, next request is made after 30 seconds.
+// TODO: Make healthcheck configurable.
 func (d DownstreamServer) IsAlive() bool {
 	if time.Since(d.lastAlive).Seconds() < 30.0 {
 		return true
