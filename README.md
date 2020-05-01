@@ -86,7 +86,7 @@ func main() {
 
 ## Open TODOs
 
-- Make `LoadBalancer` aware of changes in downstream server list
+- Improve logging
 - Write tests
 - Implement a Eureka Client
 - Priority RoundRobin implementation
