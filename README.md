@@ -2,37 +2,21 @@
 
 A lightweight, extendable, and blazing fast API Gateway.
 
-## Basics
+## Getting started
 
-```go
-package main
+Stargate's concept is to take in a table of routes and downstream services and create a load balancer that reverse
+proxies to them. This table is created by a `stargate.ServiceLister` instance and is passed to `stargate.NewProxy`
+function.
 
-import (
-	"log"
-	"net/http"
+Check the [basic example](https://github.com/realbucksavage/stargate/blob/master/examples/basic.go) that implements a
+`stargate.ServiceLister` to create a static table of routes and uses round-robin appproch to load balance the request.
 
-	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/balancers"
-	"github.com/realbucksavage/stargate/listers"
-)
+### Using dynamic route tables.
 
-func main() {
+If the `stargate.ServiceLister`'s implementation updates the route table, the `stargate.Proxy` instance can be told
+to update the routing by calling the `Reload()` method.
 
-	l := listers.StaticLister{
-		Routes: map[string][]string{
-			"/downstream_1": {"http://localhost:8081", "http://localhost:8082"},
-			"/downstream_2": {"http://localhost:8083"},
-		},
-	}
-	sg, err := stargate.NewProxy(l, balancers.RoundRobin)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	http.Handle("/", &sg)
-	log.Fatal(http.ListenAndServe(":7000", nil))
-}
-```
+Check the [reloading routes example](https://github.com/realbucksavage/stargate/blob/master/examples/reload.go).
 
 ### Middleware
 
@@ -42,53 +26,33 @@ A middleware is a function that is defined like this
 type Middleware func(*Context, http.Handler) http.HandlerFunc
 ```
 
-You can create your middleware and pass them to `NewProxy` like this:
+Any middleware to be applied must be passed to the `NewProxy` function like shown.
 
 ```go
-package main
-
-import (
-	"net/http"
-
-	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/balancers"
-)
-
-func main() {
-	// declare a context and a lister
-	sg, err := stargate.NewProxy(lister, balancers.RoundRobin, myMiddleware)
-}
-
-func myMiddleware(ctx *stargate.Context, next http.Handler) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Some code here
-		next.ServeHTTP(w, r)
-	})
-}
+sg, err := stargate.NewProxy(lister, balancers.RoundRobin, middleware1, middleware2)
 ```
 
-There is a middleware that logs all requests in the `middlware` package
-
-```go
-package main
-
-import (
-	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/balancers"
-	mw "github.com/realbucksavage/stargate/middleware"
-)
-
-func main() {
-	stargate.NewProxy(lister, balancers.RoundRobin, myMiddleware, mw.LoggingMiddleware())
-}
-```
+Check the [middleware example](https://github.com/realbucksavage/stargate/blob/master/examples/middleware.go). There's
+already one [middleware implemented in the `middleware` package](https://github.com/realbucksavage/stargate/blob/master/middleware/logger.go)
+that logs http responses and execution time.
 
 ## Open TODOs
 
 - Improve logging
+- Improve documentation
 - Write tests
-- Implement a Eureka Client
-- Priority RoundRobin implementation
-- HTTP2
 - WebSockets
+
+### `ServiceLister` implementations
+
+- Eureka
+- Consuul
+
+### `LoadBalancer` implementations
+
+- Priority round robin
+
+### Test with
+
+- HTTP2
 - See how Multipart will work

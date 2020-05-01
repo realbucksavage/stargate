@@ -4,6 +4,7 @@ import (
 	"github.com/realbucksavage/stargate"
 	"github.com/realbucksavage/stargate/balancers"
 	"github.com/realbucksavage/stargate/listers"
+	"github.com/realbucksavage/stargate/middleware"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,7 +17,7 @@ func main() {
 			"/ds_2": {"http://app2-sv1:8080"},
 		},
 	}
-	sg, err := stargate.NewProxy(l, balancers.RoundRobin, someMiddleware)
+	sg, err := stargate.NewProxy(l, balancers.RoundRobin, someMiddleware, middleware.LoggingMiddleware())
 	if err != nil {
 		log.Fatal(err)
 	}
