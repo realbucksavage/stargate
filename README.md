@@ -43,16 +43,16 @@ that logs http responses and execution time.
 - Write tests
 - WebSockets
 
-### `ServiceLister` implementations
+#### `ServiceLister` implementations
 
 - Eureka
 - Consuul
 
-### `LoadBalancer` implementations
+#### `LoadBalancer` implementations
 
 - Priority round robin
 
-### Test with
+#### Test with
 
 - HTTP2
 - See how Multipart will work
