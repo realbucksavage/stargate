@@ -89,6 +89,7 @@ func main() {
 - Make `LoadBalancer` aware of changes in downstream server list
 - Write tests
 - Implement a Eureka Client
+- Priority RoundRobin implementation
 - HTTP2
 - WebSockets
 - See how Multipart will work
