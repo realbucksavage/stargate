@@ -16,7 +16,7 @@ func main() {
 			"/ds_1": {"http://localhost:8082"},
 		},
 	}
-	sg, err := stargate.NewProxy(&l, balancers.RoundRobin, headerAddingMiddleware, mw.LoggingMiddleware())
+	sg, err := stargate.NewProxy(&l, balancers.RoundRobin)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,8 +40,8 @@ func (c *customLister) List(route string) []string {
 	return c.Routes[route]
 }
 
-func (c *customLister) ListAll() map[string][]string {
-	return c.Routes
+func (c *customLister) ListAll() (map[string][]string, error) {
+	return c.Routes, nil
 }
 
 func (c *customLister) changeRoutes() {
