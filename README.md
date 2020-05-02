@@ -18,6 +18,18 @@ to update the routing by calling the `Reload()` method.
 
 Check the [reloading routes example](https://github.com/realbucksavage/stargate/blob/master/examples/reload.go).
 
+#### Eureka service discovery
+
+`listers.Eureka(string)` returns a `ServiceLister` instance that queries the specified eureka server for registered
+applications. Calling the `Reload()` method on `stargate.Proxy` instance causes the Eureka lister to query eureka server
+and update the routes.
+
+```go
+el := listers.Eureka("http://localhost:8761/eureka")
+```
+
+Check the [eureka service discovery example](https://github.com/realbucksavage/stargate/blob/master/examples/eureka.go).
+
 ### Middleware
 
 A middleware is a function that is defined like this
@@ -45,7 +57,7 @@ that logs http responses and execution time.
 
 #### `ServiceLister` implementations
 
-- Eureka
+- Etcd
 - Consuul
 
 #### `LoadBalancer` implementations

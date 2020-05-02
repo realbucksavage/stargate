@@ -8,6 +8,6 @@ func (s StaticLister) List(route string) []string {
 	return s.Routes[route]
 }
 
-func (s StaticLister) ListAll() map[string][]string {
-	return s.Routes
+func (s StaticLister) ListAll() (map[string][]string, error) {
+	return s.Routes, nil
 }
