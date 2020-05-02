@@ -31,16 +31,21 @@ func (s *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Reload queries the ServiceLister used to create the Proxy instance re-initializes the underlying *mux.Router. This
 // method should be called after the ServiceLister has updated its routes.
-func (s *Proxy) Reload() {
+func (s *Proxy) Reload() error {
 
 	rtr := mux.NewRouter()
-	routes := s.lister.ListAll()
+	routes, err := s.lister.ListAll()
+	if err != nil {
+		Logger.Errorf("Cannot query lister for routes : %v", err)
+		return err
+	}
+
 	for route, svc := range routes {
 
 		lb, err := s.balancerMaker(svc, defaultDirector(s.ctx, route))
 		if err != nil {
 			Logger.Errorf("Cannot create a loadBalancer for route %s : %v", route, err)
-			continue
+			return err
 		}
 
 		handler := createHandler(s.ctx, lb, s.middleware)
@@ -52,6 +57,8 @@ func (s *Proxy) Reload() {
 	s.mutex.Lock()
 	s.mux = rtr
 	s.mutex.Unlock()
+
+	return nil
 }
 
 // NewProxy takes in a ServiceLister, LoadBalancerMaker, and a chain of Middleware and creates a functional Proxy
@@ -61,7 +68,12 @@ func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker, mwf ...Middl
 	r := mux.NewRouter()
 	ctx := &Context{}
 
-	routes := l.ListAll()
+	routes, err := l.ListAll()
+	if err != nil {
+		Logger.Errorf("Cannot query lister for routes : %v", err)
+		return Proxy{}, err
+	}
+
 	for route, svc := range routes {
 		lb, err := loadBalancerMaker(svc, defaultDirector(ctx, route))
 		if err != nil {
