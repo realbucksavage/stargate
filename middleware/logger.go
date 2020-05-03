@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	loggerName = "stargate-requests"
+	loggerName = "stargate.requests"
 )
 
 var (
