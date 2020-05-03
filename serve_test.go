@@ -1,11 +1,9 @@
 package stargate
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,35 +13,27 @@ func TestServe(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(testServerHandler))
 	defer backend.Close()
 
-	sl := StaticLister{
-		Routes: map[string][]string{
-			"/": {toUrl(backend)},
-		},
-	}
-	sg, err := NewProxy(sl, RoundRobin)
+	ctx := new(Context)
+
+	backends := []string{toUrl(backend)}
+	roundRobin, err := RoundRobin(backends, defaultDirector(ctx, "/"))
 	if err != nil {
-		panic(err)
+		t.Errorf("Cannot create roundRobin LB : %v", err)
 	}
 
-	server := httptest.NewServer(&sg)
+	server := httptest.NewServer(http.HandlerFunc(serve(roundRobin)))
 	defer server.Close()
 
-	cli := &http.Client{
-		Transport: &http.Transport{
-			DialContext: func(_ context.Context, network, _ string) (net.Conn, error) {
-				return net.Dial(network, server.Listener.Addr().String())
-			},
-		},
-	}
-
-	get, err := cli.Get(toUrl(server))
+	client := &http.Client{}
+	get, err := client.Get(toUrl(server))
 	if err != nil {
-		panic(err)
+		t.Errorf("Cannot execute GET request : %v", err)
 	}
 
-	all, _ := ioutil.ReadAll(get.Body)
-	if string(all) != "ok" {
-		t.Errorf(`Expected "ok" but got "%s"`, string(all))
+	b, _ := ioutil.ReadAll(get.Body)
+	resp := string(b)
+	if resp != "ok" {
+		t.Errorf(`Expected "ok" but got "%s"`, resp)
 	}
 }
 
