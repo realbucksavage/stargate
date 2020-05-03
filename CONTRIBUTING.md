@@ -8,17 +8,17 @@ to this project is fairly easy. Just read on :smile:
 
 1. Unit tests
 2. Feature Suggestions
-3. Cleaner/Easier implememtation
+3. Cleaner/Easier implementation
 4. Documentation
 
 ## How do I contribute
 
-### Suggesting a feature
+### Requesting a feature
 
 Please use the GitHub Issues board.
 
 ### Contributing in code
 
 1. Fork the project
-2. Create a branch `feature|bugfix|refactor/the-feature` in your fork.
+2. Create a branch `feature|enhance|bugfix|refactor/the-feature` in your fork.
 3. Start a PR from your fork.
