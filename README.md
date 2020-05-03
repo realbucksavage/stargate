@@ -2,6 +2,11 @@
 
 A lightweight, extendable, and blazing fast API Gateway.
 
+Stargate supports:
+- Hot-reloading of routes
+- Eureka service registry
+- Middleware
+
 ## Getting started
 
 Stargate's concept is to take in a table of routes and downstream services and create a load balancer that reverse
