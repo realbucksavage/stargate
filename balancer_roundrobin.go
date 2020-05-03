@@ -22,6 +22,7 @@ func (r *roundRobinBalancer) NextServer() *DownstreamServer {
 	return r.servers[i]
 }
 
+// Length returns the number of downstream servers this load balancer can serve to.
 func (r *roundRobinBalancer) Length() int {
 	return len(r.servers)
 }
