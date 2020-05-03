@@ -2,7 +2,6 @@ package examples
 
 import (
 	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/balancers"
 	"log"
 	"net/http"
 	"time"
@@ -16,7 +15,7 @@ func main() {
 			"/ds_1": {"http://localhost:8082"},
 		},
 	}
-	sg, err := stargate.NewProxy(&l, balancers.RoundRobin)
+	sg, err := stargate.NewProxy(&l, stargate.RoundRobin)
 	if err != nil {
 		log.Fatal(err)
 	}

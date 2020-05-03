@@ -1,18 +1,17 @@
-package balancers
+package stargate
 
 import (
-	"github.com/realbucksavage/stargate"
 	"net/http/httputil"
 	"net/url"
 )
 
 type roundRobinBalancer struct {
-	servers []*stargate.DownstreamServer
+	servers []*DownstreamServer
 	latest  int
 }
 
 // NextServer returns the next server that should serve the request.
-func (r *roundRobinBalancer) NextServer() *stargate.DownstreamServer {
+func (r *roundRobinBalancer) NextServer() *DownstreamServer {
 	if len(r.servers) == 0 {
 		return nil
 	}
@@ -28,7 +27,7 @@ func (r *roundRobinBalancer) Length() int {
 }
 
 // RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
-func RoundRobin(svc []string, director stargate.DirectorFunc) (stargate.LoadBalancer, error) {
+func RoundRobin(svc []string, director DirectorFunc) (LoadBalancer, error) {
 	r := &roundRobinBalancer{}
 	if err := r.createRoutes(svc, director); err != nil {
 		return nil, err
@@ -37,8 +36,8 @@ func RoundRobin(svc []string, director stargate.DirectorFunc) (stargate.LoadBala
 	return r, nil
 }
 
-func (r *roundRobinBalancer) createRoutes(svc []string, director stargate.DirectorFunc) error {
-	r.servers = []*stargate.DownstreamServer{}
+func (r *roundRobinBalancer) createRoutes(svc []string, director DirectorFunc) error {
+	r.servers = []*DownstreamServer{}
 
 	for _, s := range svc {
 		localServer, err := createProxy(s, director)
@@ -53,12 +52,12 @@ func (r *roundRobinBalancer) createRoutes(svc []string, director stargate.Direct
 	return nil
 }
 
-func createProxy(s string, director stargate.DirectorFunc) (stargate.DownstreamServer, error) {
-	var localServer stargate.DownstreamServer
+func createProxy(s string, director DirectorFunc) (DownstreamServer, error) {
+	var localServer DownstreamServer
 
 	origin, err := url.Parse(s)
 	if err != nil {
-		return stargate.DownstreamServer{}, err
+		return DownstreamServer{}, err
 	}
 
 	localServer.BaseURL = s
