@@ -15,12 +15,6 @@ type DownstreamServer struct {
 	lastAlive time.Time
 }
 
-// ServiceLister provides all available routes and their downstream services
-type ServiceLister interface {
-	List(string) []string
-	ListAll() (map[string][]string, error)
-}
-
 // IsAlive performs a healthcheck on the server and returns true if the server responds back. If a server responds to
 // an initial healthcheck request, next request is made after 30 seconds.
 // TODO: Make healthcheck configurable.

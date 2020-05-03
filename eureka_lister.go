@@ -1,10 +1,9 @@
-package listers
+package stargate
 
 import (
 	"fmt"
 	"github.com/hudl/fargo"
 	log "github.com/op/go-logging"
-	"github.com/realbucksavage/stargate"
 	"strings"
 )
 
@@ -47,10 +46,10 @@ func (e eurekaLister) ListAll() (map[string][]string, error) {
 	return e.routes, nil
 }
 
-// Eureka is an implementation of `stargate.ServiceLister` that adds support to list services registered in the passed
+// EurekaLister is an implementation of `stargate.ServiceLister` that adds support to list services registered in the passed
 // eureka server. The application name of each registered service is used as a route key, e.g, if an application
-// "SOME-App" is registered with Eureka, it will be accessible at /some-app.
-func Eureka(address string) stargate.ServiceLister {
+// "SOME-App" is registered with EurekaLister, it will be accessible at /some-app.
+func EurekaLister(address string) ServiceLister {
 	// Get rid of those annoying messages
 	log.SetLevel(log.ERROR, "fargo")
 

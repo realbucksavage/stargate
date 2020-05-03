@@ -3,7 +3,6 @@ package examples
 import (
 	"github.com/realbucksavage/stargate"
 	"github.com/realbucksavage/stargate/balancers"
-	"github.com/realbucksavage/stargate/listers"
 	"github.com/realbucksavage/stargate/middleware"
 	"log"
 	"net/http"
@@ -11,7 +10,7 @@ import (
 )
 
 func main() {
-	l := listers.StaticLister{
+	l := stargate.StaticLister{
 		Routes: map[string][]string{
 			"/ds_1": {"http://app1-sv1:8080", "http://app1-sv2:8080"},
 			"/ds_2": {"http://app2-sv1:8080"},

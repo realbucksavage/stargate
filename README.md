@@ -20,12 +20,12 @@ Check the [reloading routes example](https://github.com/realbucksavage/stargate/
 
 #### Eureka service discovery
 
-`listers.Eureka(string)` returns a `ServiceLister` instance that queries the specified eureka server for registered
+`stargate.EurekaLister(string)` returns a `ServiceLister` instance that queries the specified eureka server for registered
 applications. Calling the `Reload()` method on `stargate.Proxy` instance causes the Eureka lister to query eureka server
 and update the routes.
 
 ```go
-el := listers.Eureka("http://localhost:8761/eureka")
+el := stargate.EurekaLister("http://localhost:8761/eureka")
 ```
 
 Check the [eureka service discovery example](https://github.com/realbucksavage/stargate/blob/master/examples/eureka.go).
