@@ -10,7 +10,8 @@ import (
 )
 
 func TestServe(t *testing.T) {
-	backend := httptest.NewServer(http.HandlerFunc(testServerHandler))
+	okCode := "ok"
+	backend := httptest.NewServer(namedHandler(okCode))
 	defer backend.Close()
 
 	ctx := new(Context)
@@ -32,15 +33,17 @@ func TestServe(t *testing.T) {
 
 	b, _ := ioutil.ReadAll(get.Body)
 	resp := string(b)
-	if resp != "ok" {
-		t.Errorf(`Expected "ok" but got "%s"`, resp)
+	if resp != okCode {
+		t.Errorf(`Expected "%s" but got "%s"`, okCode, resp)
 	}
 }
 
-func testServerHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	if _, err := io.WriteString(w, "ok"); err != nil {
-		panic(err)
+func namedHandler(name string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		if _, err := io.WriteString(w, name); err != nil {
+			panic(err)
+		}
 	}
 }
 
