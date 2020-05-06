@@ -20,31 +20,39 @@ var (
 	defaultLevel  = log.INFO
 )
 
-type (
-	LoggerConfig struct {
-		Out   io.Writer
-		Level log.Level
-	}
+// LoggerConfig facilitates configuration of the request log writer. As of now, only the logging level and its output
+// are configurable.
+// TODO: Add more config options like "formatter"
+type LoggerConfig struct {
+	// Out is the Writer instance the logger will write to.
+	Out io.Writer
 
-	loggingResponseWriter struct {
-		http.ResponseWriter
-		status int
-	}
-)
+	// Level is logging level for the requests logger.
+	Level log.Level
+}
 
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+// WriteHeader makes loggingResponseWriter implement http.ResponseWriter.
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.status = code
 	lrw.ResponseWriter.WriteHeader(code)
 }
 
+// LoggingMiddleware creates the middleware with the logger set to default config.
 func LoggingMiddleware() stargate.Middleware {
 	return LoggerWithConfig(LoggerConfig{})
 }
 
+// LoggedWithOutput creates the middleware with the logger set to write to the passed in io.Writer
 func LoggerWithOutput(w io.Writer) stargate.Middleware {
 	return LoggerWithConfig(LoggerConfig{Out: w})
 }
 
+// LoggerWithConfig takes in an entire LoggerConfig struct and creates the middleware with passed in configuration.
 func LoggerWithConfig(conf LoggerConfig) stargate.Middleware {
 	if conf.Out == nil {
 		conf.Out = defaultWriter
