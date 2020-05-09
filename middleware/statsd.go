@@ -11,9 +11,13 @@ import (
 
 const (
 	formatStatusCode = "http_status_%d"
-	formatTime       = "response_time"
+	formatStatError  = "%s stat not recorded: %v"
+
+	tagResponseTime = "response_time"
 )
 
+// StatsdMiddleware sends current response rate and response latency to the provided statd
+// daemons like https://github.com/statd/statd or Amazon CloudWatch Agent.
 func StatsdMiddleware(address, prefix string) stargate.Middleware {
 
 	client := statsd.NewStatsdClient(address, prefix)
@@ -28,12 +32,12 @@ func StatsdMiddleware(address, prefix string) stargate.Middleware {
 			lrw := &loggingResponseWriter{w, http.StatusOK}
 			next.ServeHTTP(lrw, r)
 
-			if err := client.Timing(formatTime, time.Since(t).Milliseconds()); err != nil {
-				stargate.Logger.Warningf("Time stat not recorded: %v", err)
+			if err := client.Timing(tagResponseTime, time.Since(t).Milliseconds()); err != nil {
+				stargate.Logger.Warningf(formatStatError, "Time", err)
 			}
 
 			if err := client.Incr(fmt.Sprintf(formatStatusCode, lrw.status), int64(1)); err != nil {
-				stargate.Logger.Warningf("Incr stat not recorded: %s", err)
+				stargate.Logger.Warningf(formatStatError, "Incr", err)
 			}
 		}
 	}
