@@ -10,6 +10,7 @@ require (
 	github.com/hudl/fargo v1.3.0
 	github.com/miekg/dns v1.1.29 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
+	github.com/quipo/statsd v0.0.0-20180118161217-3d6a5565f314
 	gopkg.in/gcfg.v1 v1.2.3 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )

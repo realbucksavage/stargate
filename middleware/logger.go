@@ -31,17 +31,6 @@ type LoggerConfig struct {
 	Level log.Level
 }
 
-type loggingResponseWriter struct {
-	http.ResponseWriter
-	status int
-}
-
-// WriteHeader makes loggingResponseWriter implement http.ResponseWriter.
-func (lrw *loggingResponseWriter) WriteHeader(code int) {
-	lrw.status = code
-	lrw.ResponseWriter.WriteHeader(code)
-}
-
 // LoggingMiddleware creates the middleware with the logger set to default config.
 func LoggingMiddleware() stargate.Middleware {
 	return LoggerWithConfig(LoggerConfig{})
