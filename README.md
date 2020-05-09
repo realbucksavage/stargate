@@ -37,7 +37,7 @@ Check the [eureka service discovery example](https://github.com/realbucksavage/s
 
 ### Publishing statistics to `statsd`
 
-This can be done by using the [`StatsdMiddleware`](https://github.com/realbucksavage/stargate/blob/master/middleware/statsd/go).
+This can be done by using the [`StatsdMiddleware`](https://github.com/realbucksavage/stargate/blob/master/middleware/statsd.go#L21).
 
 ```go
 mw := middleware.StatsdMiddleware("127.0.0.1:8125", "some_app.")
