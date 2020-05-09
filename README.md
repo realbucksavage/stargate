@@ -1,6 +1,6 @@
 # Stargate
 
-A lightweight, extendable, and blazing fast API Gateway.
+A lightweight, extendable, and blazing fast gateway server library.
 
 Stargate supports:
 - Hot-reloading of routes
@@ -34,6 +34,20 @@ el := stargate.EurekaLister("http://localhost:8761/eureka")
 ```
 
 Check the [eureka service discovery example](https://github.com/realbucksavage/stargate/blob/master/examples/eureka.go).
+
+### Publishing statistics to `statsd`
+
+This can be done by using the [`StatsdMiddleware`](https://github.com/realbucksavage/stargate/blob/master/middleware/statsd/go).
+
+```go
+mw := middleware.StatsdMiddleware("127.0.0.1:8125", "some_app.")
+sg, err := stargate.NewProxy(lister, stargate.RoundRobin, mw)
+```
+
+Refer the [example](https://github.com/realbucksavage/stargate/blob/master/examples/statsd.go).
+
+> **NOTE**: As of now, the middleware publishes only response times and HTTP response rates.
+> Please use the issues board to request more stat integrations, or create a PR :smile:
 
 ### Middleware
 
