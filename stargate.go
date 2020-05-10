@@ -15,7 +15,7 @@ type Proxy struct {
 	ctx           *Context
 	middleware    []Middleware
 
-	mutex sync.Mutex
+	mutex sync.RWMutex
 }
 
 // Middleware receives a http.Handler and returns an http.HandlerFunc. The returned http.HandlerFunc is a closure that
@@ -24,9 +24,10 @@ type Proxy struct {
 type Middleware func(*Context, http.Handler) http.HandlerFunc
 
 func (s *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.mutex.Lock()
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
 	s.mux.ServeHTTP(w, r)
-	s.mutex.Unlock()
 }
 
 // Reload queries the ServiceLister used to create the Proxy instance re-initializes the underlying *mux.Router. This
@@ -54,6 +55,7 @@ func (s *Proxy) Reload() error {
 		Logger.Infof("Route updated -\t%s", route)
 	}
 
+	// Wait for requests to finish before swapping
 	s.mutex.Lock()
 	s.mux = rtr
 	s.mutex.Unlock()
