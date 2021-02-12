@@ -1,9 +1,10 @@
 package stargate
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
 	"sync"
+
+	"github.com/gorilla/mux"
 )
 
 // Proxy implements the http.Handler interface and handles all requests that are to be reverse proxied. Proxy wraps a
@@ -84,7 +85,7 @@ func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker, mwf ...Middl
 		}
 
 		handler := createHandler(ctx, lb, mwf)
-		r.HandleFunc(route, handler)
+		r.PathPrefix(route).HandlerFunc(handler)
 
 		Logger.Infof("Route initialized -\t%s", route)
 	}
