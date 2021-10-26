@@ -2,9 +2,10 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/realbucksavage/stargate"
 	"net/http"
 	"time"
+
+	"github.com/realbucksavage/stargate"
 
 	"github.com/quipo/statsd"
 )
@@ -25,7 +26,7 @@ func StatsdMiddleware(address, prefix string) stargate.Middleware {
 		stargate.Logger.Warningf("Cannot start statsd client for %s: %s", address, err)
 	}
 
-	return func(ctx *stargate.Context, next http.Handler) http.HandlerFunc {
+	return func(next http.Handler) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			t := time.Now()
 

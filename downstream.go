@@ -3,6 +3,7 @@ package stargate
 import (
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"time"
 )
 
@@ -23,7 +24,18 @@ func (d DownstreamServer) IsAlive() bool {
 		return true
 	}
 
-	_, err := http.Get(d.BaseURL)
+	u, err := url.Parse(d.BaseURL)
+	if err != nil {
+		Logger.Errorf("invalid URL %s: %v", d.BaseURL, err)
+		return false
+	}
+
+	if u.Scheme == "" {
+		Logger.Debugf("no scheme specified in %s, assuming http", d.BaseURL)
+		u.Scheme = "http"
+	}
+
+	_, err = http.Get(u.String())
 	if err != nil {
 		Logger.Errorf("Alive-check failed for server %s : %v", d.BaseURL, err)
 		return false

@@ -1,15 +1,16 @@
 package examples
 
 import (
-	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/middleware"
+	"log"
 	"net/http"
 
-	"log"
+	"github.com/realbucksavage/stargate"
+	"github.com/realbucksavage/stargate/pkg/listers"
+	"github.com/realbucksavage/stargate/pkg/middleware"
 )
 
 func main() {
-	l := stargate.StaticLister{
+	l := listers.Static{
 		Routes: map[string][]string{
 			"/": {"http://localhost:8081"},
 		},

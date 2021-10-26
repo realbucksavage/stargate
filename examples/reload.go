@@ -1,10 +1,11 @@
 package examples
 
 import (
-	"github.com/realbucksavage/stargate"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/realbucksavage/stargate"
 )
 
 func main() {

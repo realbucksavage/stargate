@@ -2,13 +2,15 @@ package examples
 
 import (
 	"github.com/realbucksavage/stargate"
+	"github.com/realbucksavage/stargate/pkg/listers"
+
 	"log"
 	"net/http"
 	"time"
 )
 
 func main() {
-	el := stargate.EurekaLister("http://localhost:8761/eureka")
+	el := listers.Eureka("http://localhost:8761/eureka")
 	sg, err := stargate.NewProxy(el, stargate.RoundRobin)
 	if err != nil {
 		log.Fatal(err)

@@ -54,12 +54,11 @@ func LoggerWithConfig(conf LoggerConfig) stargate.Middleware {
 	l := log.MustGetLogger(loggerName)
 	log.SetLevel(conf.Level, loggerName)
 
-	return func(ctx *stargate.Context, next http.Handler) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-
+	return func(next http.Handler) http.HandlerFunc {
+		return func(rw http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 
-			lrw := &loggingResponseWriter{w, http.StatusOK}
+			lrw := &loggingResponseWriter{rw, http.StatusOK}
 			next.ServeHTTP(lrw, r)
 
 			l.Infof("[%s | %d] %s\t\t(%dms)",

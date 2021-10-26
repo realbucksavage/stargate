@@ -2,14 +2,15 @@ package examples
 
 import (
 	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/middleware"
+	"github.com/realbucksavage/stargate/pkg/listers"
+	"github.com/realbucksavage/stargate/pkg/middleware"
+
 	"log"
 	"net/http"
-	"strconv"
 )
 
 func main() {
-	l := stargate.StaticLister{
+	l := listers.Static{
 		Routes: map[string][]string{
 			"/ds_1": {"http://app1-sv1:8080", "http://app1-sv2:8080"},
 			"/ds_2": {"http://app2-sv1:8080"},
@@ -23,10 +24,9 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", &sg))
 }
 
-func someMiddleware(c *stargate.Context, next http.Handler) http.HandlerFunc {
+func someMiddleware(next http.Handler) http.HandlerFunc {
 	count := 0
 	return func(w http.ResponseWriter, r *http.Request) {
-		c.AddHeader("X-Hit-Count", strconv.Itoa(count))
 		next.ServeHTTP(w, r)
 		count++
 	}

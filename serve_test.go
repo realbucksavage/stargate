@@ -14,10 +14,8 @@ func TestServe(t *testing.T) {
 	backend := httptest.NewServer(namedHandler(okCode))
 	defer backend.Close()
 
-	ctx := new(Context)
-
 	backends := []string{toUrl(backend)}
-	roundRobin, err := RoundRobin(backends, defaultDirector(ctx, "/"))
+	roundRobin, err := RoundRobin(backends, defaultDirector("/"))
 	if err != nil {
 		t.Errorf("Cannot create roundRobin LB : %v", err)
 	}
