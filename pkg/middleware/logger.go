@@ -1,58 +1,31 @@
 package middleware
 
 import (
-	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/realbucksavage/stargate"
-
-	log "github.com/op/go-logging"
 )
 
 const (
-	loggerName = "stargate.requests"
+	loggerName = "[stargate.requests] "
 )
 
-var (
-	defaultWriter = os.Stdout
-	defaultLevel  = log.INFO
-)
-
-// LoggerConfig facilitates configuration of the request log writer. As of now, only the logging level and its output
-// are configurable.
-// TODO: Add more config options like "formatter"
+// LoggerConfig facilitates configuration of the request log writer.
 type LoggerConfig struct {
-	// Out is the Writer instance the logger will write to.
-	Out io.Writer
-
-	// Level is logging level for the requests logger.
-	Level log.Level
+	// Logger the underlying *log.Logger that will receive logging info
+	Logger *log.Logger
 }
 
 // LoggingMiddleware creates the middleware with the logger set to default config.
 func LoggingMiddleware() stargate.Middleware {
-	return LoggerWithConfig(LoggerConfig{})
+	return LoggerWithConfig(LoggerConfig{log.New(os.Stdout, loggerName, log.LstdFlags)})
 }
 
-// LoggedWithOutput creates the middleware with the logger set to write to the passed in io.Writer
-func LoggerWithOutput(w io.Writer) stargate.Middleware {
-	return LoggerWithConfig(LoggerConfig{Out: w})
-}
-
-// LoggerWithConfig takes in an entire LoggerConfig struct and creates the middleware with passed in configuration.
+// LoggerWithConfig creates a stargate.Middleware that logs on the LoggerConfig's Logger instance
 func LoggerWithConfig(conf LoggerConfig) stargate.Middleware {
-	if conf.Out == nil {
-		conf.Out = defaultWriter
-	}
-
-	if conf.Level == 0 {
-		conf.Level = defaultLevel
-	}
-
-	l := log.MustGetLogger(loggerName)
-	log.SetLevel(conf.Level, loggerName)
 
 	return func(next http.Handler) http.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) {
@@ -61,11 +34,11 @@ func LoggerWithConfig(conf LoggerConfig) stargate.Middleware {
 			lrw := &loggingResponseWriter{rw, http.StatusOK}
 			next.ServeHTTP(lrw, r)
 
-			l.Infof("[%s | %d] %s\t\t(%dms)",
+			conf.Logger.Printf("[%s | %d] %s\t\t(%v)",
 				r.Method,
 				lrw.status,
 				r.RequestURI,
-				time.Now().Sub(start).Milliseconds())
+				time.Since(start))
 		}
 	}
 }
