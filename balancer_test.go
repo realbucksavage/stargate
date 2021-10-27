@@ -54,7 +54,7 @@ func TestRoundRobin(t *testing.T) {
 	t.Logf("Stargate ready at %s", server.Listener.Addr().String())
 
 	client := &http.Client{}
-	for i, j := 1, 1; i <= 10; i++ {
+	for i, j := 1, 1; i < 10; i++ {
 		get, err := client.Get(toUrl(server))
 		if err != nil {
 			t.Error(err)
