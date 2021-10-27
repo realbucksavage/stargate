@@ -48,7 +48,6 @@ func (s *Proxy) Reload() error {
 	}
 
 	for route, svc := range routes {
-
 		lb, err := s.balancerMaker(svc, defaultDirector(route))
 		if err != nil {
 			Logger.Errorf("Cannot create a loadBalancer for route %s : %v", route, err)
@@ -56,7 +55,7 @@ func (s *Proxy) Reload() error {
 		}
 
 		handler := createHandler(lb, s.middleware)
-		rtr.NewRoute().Path(route).Handler(handler)
+		rtr.PathPrefix(route).Handler(handler)
 
 		Logger.Infof("Route updated -\t%s", route)
 	}
