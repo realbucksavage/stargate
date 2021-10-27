@@ -43,21 +43,21 @@ func (s *Proxy) Reload() error {
 	rtr := mux.NewRouter()
 	routes, err := s.lister.ListAll()
 	if err != nil {
-		Logger.Errorf("Cannot query lister for routes : %v", err)
+		Log.Error("Cannot query lister for routes : %v", err)
 		return err
 	}
 
 	for route, svc := range routes {
 		lb, err := s.balancerMaker(svc, defaultDirector(route))
 		if err != nil {
-			Logger.Errorf("Cannot create a loadBalancer for route %s : %v", route, err)
+			Log.Error("Cannot create a loadBalancer for route %s : %v", route, err)
 			return err
 		}
 
 		handler := createHandler(lb, s.middleware)
 		rtr.PathPrefix(route).Handler(handler)
 
-		Logger.Infof("Route updated -\t%s", route)
+		Log.Info("Route updated -\t%s", route)
 	}
 
 	// Wait for requests to finish before swapping
@@ -76,21 +76,21 @@ func NewProxy(l ServiceLister, loadBalancerMaker LoadBalancerMaker, mwf ...Middl
 
 	routes, err := l.ListAll()
 	if err != nil {
-		Logger.Errorf("Cannot query lister for routes : %v", err)
+		Log.Error("Cannot query lister for routes : %v", err)
 		return Proxy{}, err
 	}
 
 	for route, svc := range routes {
 		lb, err := loadBalancerMaker(svc, defaultDirector(route))
 		if err != nil {
-			Logger.Errorf("Cannot create a loadBalancer for route %s : %v", route, err)
+			Log.Error("Cannot create a loadBalancer for route %s : %v", route, err)
 			return Proxy{}, err
 		}
 
 		handler := createHandler(lb, mwf)
 		r.PathPrefix(route).Handler(handler)
 
-		Logger.Infof("Route initialized -\t%s", route)
+		Log.Info("Route initialized -\t%s", route)
 	}
 
 	return Proxy{

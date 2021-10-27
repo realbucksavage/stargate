@@ -26,18 +26,18 @@ func (d DownstreamServer) IsAlive() bool {
 
 	u, err := url.Parse(d.BaseURL)
 	if err != nil {
-		Logger.Errorf("invalid URL %s: %v", d.BaseURL, err)
+		Log.Error("invalid URL %s: %v", d.BaseURL, err)
 		return false
 	}
 
 	if u.Scheme == "" {
-		Logger.Debugf("no scheme specified in %s, assuming http", d.BaseURL)
+		Log.Debug("no scheme specified in %s, assuming http", d.BaseURL)
 		u.Scheme = "http"
 	}
 
 	_, err = http.Get(u.String())
 	if err != nil {
-		Logger.Errorf("Alive-check failed for server %s : %v", d.BaseURL, err)
+		Log.Error("Alive-check failed for server %s : %v", d.BaseURL, err)
 		return false
 	}
 

@@ -23,7 +23,7 @@ func StatsdMiddleware(address, prefix string) stargate.Middleware {
 
 	client := statsd.NewStatsdClient(address, prefix)
 	if err := client.CreateSocket(); err != nil {
-		stargate.Logger.Warningf("Cannot start statsd client for %s: %s", address, err)
+		stargate.Log.Warn("Cannot start statsd client for %s: %s", address, err)
 	}
 
 	return func(next http.Handler) http.HandlerFunc {
@@ -34,11 +34,11 @@ func StatsdMiddleware(address, prefix string) stargate.Middleware {
 			next.ServeHTTP(lrw, r)
 
 			if err := client.Timing(tagResponseTime, time.Since(t).Milliseconds()); err != nil {
-				stargate.Logger.Warningf(formatStatError, "Time", err)
+				stargate.Log.Warn(formatStatError, "Time", err)
 			}
 
 			if err := client.Incr(fmt.Sprintf(formatStatusCode, lrw.status), int64(1)); err != nil {
-				stargate.Logger.Warningf(formatStatError, "Incr", err)
+				stargate.Log.Warn(formatStatError, "Incr", err)
 			}
 		}
 	}

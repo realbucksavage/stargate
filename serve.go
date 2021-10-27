@@ -13,25 +13,25 @@ func serve(lb LoadBalancer) func(w http.ResponseWriter, r *http.Request) {
 					server = sv
 					break
 				}
-				Logger.Debugf("Backend %s is not alive. Skipped.", sv.BaseURL)
+				Log.Debug("Backend %s is not alive. Skipped.", sv.BaseURL)
 				serverCount++
 			}
 		}
 
 		if server == nil {
-			Logger.Errorf("No alive server available for route %s", r.URL)
+			Log.Error("No alive server available for route %s", r.URL)
 
 			w.Header().Add("Content-Type", "text/html")
 			w.WriteHeader(http.StatusServiceUnavailable)
 
 			_, err := w.Write([]byte(`<h1>503 Service Unavailable</h1>"`))
 			if err != nil {
-				Logger.Errorf("Unable to write response to client: %v\n", err)
+				Log.Error("Unable to write response to client: %v\n", err)
 			}
 			return
 		}
 
-		Logger.Debugf("Resolved backend %s", server.BaseURL)
+		Log.Debug("Resolved backend %s", server.BaseURL)
 		server.Backend.ServeHTTP(w, r)
 	}
 }
