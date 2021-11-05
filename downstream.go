@@ -35,11 +35,17 @@ func (d DownstreamServer) IsAlive() bool {
 		u.Scheme = "http"
 	}
 
-	_, err = http.Get(u.String())
+	res, err := http.Get(u.String())
 	if err != nil {
 		Log.Error("Alive-check failed for server %s : %v", d.BaseURL, err)
 		return false
 	}
+
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			Log.Error("cannot close response body from [%s] after alive-check: %v", d.BaseURL, err)
+		}
+	}()
 
 	// TODO : Ignore status check for now.
 	d.lastAlive = time.Now()
