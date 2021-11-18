@@ -57,7 +57,7 @@ func (s *Proxy) Reload() error {
 		handler := createHandler(lb, s.middleware)
 		rtr.PathPrefix(route).Handler(handler)
 
-		Log.Info("Route updated -\t%s", route)
+		Log.Debug("Route updated -\t%s", route)
 	}
 
 	// Wait for requests to finish before swapping
