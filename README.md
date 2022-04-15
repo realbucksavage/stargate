@@ -61,10 +61,10 @@ Refer the [example](https://github.com/realbucksavage/stargate/blob/master/examp
 
 ### Middleware
 
-A middleware is a function that is defined like this
+Stargate utlizes `MiddlewareFunc` from [gorilla/mux](https://github.com/gorilla/mux), which are defined as:
 
 ```go
-type Middleware func (*Context, http.Handler) http.HandlerFunc
+type MiddlewareFunc func(next http.Handler) http.Handler
 ```
 
 Any middleware to be applied must be passed to the `NewProxy` function like shown.
