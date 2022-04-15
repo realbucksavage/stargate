@@ -20,7 +20,7 @@ func TestServe(t *testing.T) {
 		t.Errorf("Cannot create roundRobin LB : %v", err)
 	}
 
-	server := httptest.NewServer(http.HandlerFunc(serve(roundRobin)))
+	server := httptest.NewServer(serve(roundRobin))
 	defer server.Close()
 
 	client := &http.Client{}

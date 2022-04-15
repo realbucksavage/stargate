@@ -2,8 +2,8 @@ package stargate
 
 import "net/http"
 
-func serve(lb LoadBalancer) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func serve(lb LoadBalancer) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var server *DownstreamServer
 
 		if lb.Length() > 0 {
@@ -33,5 +33,5 @@ func serve(lb LoadBalancer) func(w http.ResponseWriter, r *http.Request) {
 
 		Log.Debug("Resolved backend %s", server.BaseURL)
 		server.Backend.ServeHTTP(w, r)
-	}
+	})
 }
