@@ -12,8 +12,8 @@ type httptestLister struct {
 	routes map[string][]string
 }
 
-func (h httptestLister) List(s string) []string {
-	return h.routes[s]
+func (h httptestLister) List(s string) ([]string, error) {
+	return h.routes[s], nil
 }
 
 func (h httptestLister) ListAll() (map[string][]string, error) {
@@ -27,9 +27,11 @@ func newLister(servers []*httptest.Server) ServiceLister {
 		sv = append(sv, toUrl(s))
 	}
 
-	return httptestLister{routes: map[string][]string{
-		"/": sv,
-	}}
+	return httptestLister{
+		routes: map[string][]string{
+			"/": sv,
+		},
+	}
 }
 
 func TestRoundRobin(t *testing.T) {

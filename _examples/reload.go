@@ -36,8 +36,8 @@ type customLister struct {
 	Routes map[string][]string
 }
 
-func (c *customLister) List(route string) []string {
-	return c.Routes[route]
+func (c *customLister) List(route string) ([]string, error) {
+	return c.Routes[route], nil
 }
 
 func (c *customLister) ListAll() (map[string][]string, error) {

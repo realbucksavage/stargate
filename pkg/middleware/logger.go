@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/realbucksavage/stargate"
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -20,25 +20,28 @@ type LoggerConfig struct {
 }
 
 // LoggingMiddleware creates the middleware with the logger set to default config.
-func LoggingMiddleware() stargate.Middleware {
+func LoggingMiddleware() mux.MiddlewareFunc {
 	return LoggerWithConfig(LoggerConfig{log.New(os.Stdout, loggerName, log.LstdFlags)})
 }
 
 // LoggerWithConfig creates a stargate.Middleware that logs on the LoggerConfig's Logger instance
-func LoggerWithConfig(conf LoggerConfig) stargate.Middleware {
+func LoggerWithConfig(conf LoggerConfig) mux.MiddlewareFunc {
 
-	return func(next http.Handler) http.HandlerFunc {
-		return func(rw http.ResponseWriter, r *http.Request) {
-			start := time.Now()
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 
 			lrw := &loggingResponseWriter{rw, http.StatusOK}
-			next.ServeHTTP(lrw, r)
+			defer func(begin time.Time) {
+				conf.Logger.Printf(
+					"[%s | %d] %s\t(%v)",
+					r.Method,
+					lrw.status,
+					r.RequestURI,
+					time.Since(begin),
+				)
+			}(time.Now())
 
-			conf.Logger.Printf("[%s | %d] %s\t\t(%v)",
-				r.Method,
-				lrw.status,
-				r.RequestURI,
-				time.Since(start))
-		}
+			next.ServeHTTP(lrw, r)
+		})
 	}
 }
