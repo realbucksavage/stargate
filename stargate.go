@@ -48,7 +48,7 @@ func (s *Proxy) Reload() error {
 			Log.Error("Cannot create a loadBalancer for route %s : %v", route, err)
 			return err
 		}
-
+    
 		handler := createHandler(lb, s.middleware...)
 		rtr.PathPrefix(route).Handler(handler)
 

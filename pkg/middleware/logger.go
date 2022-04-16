@@ -40,7 +40,7 @@ func LoggerWithConfig(conf LoggerConfig) mux.MiddlewareFunc {
 					time.Since(begin),
 				)
 			}(time.Now())
-
+      
 			next.ServeHTTP(lrw, r)
 		})
 	}
