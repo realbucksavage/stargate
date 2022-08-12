@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/pkg/listers"
+	"github.com/realbucksavage/stargate/listers"
 
 	"log"
 	"net/http"
