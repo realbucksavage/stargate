@@ -19,7 +19,7 @@ func serve(lb LoadBalancer) http.Handler {
 		}
 
 		if server == nil {
-			Log.Error("No alive server available for route %s", r.URL)
+			Log.Error("No alive server available for downstreamRoute %s", r.URL)
 
 			w.Header().Add("Content-Type", "text/html")
 			w.WriteHeader(http.StatusServiceUnavailable)

@@ -1,4 +1,4 @@
-package examples
+package main
 
 import (
 	"github.com/realbucksavage/stargate"
@@ -11,7 +11,7 @@ import (
 
 func main() {
 	el := listers.Eureka("http://localhost:8761/eureka")
-	sg, err := stargate.NewProxy(el, stargate.RoundRobin)
+	sg, err := stargate.NewRouter(el)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,5 +26,5 @@ func main() {
 		}
 	}()
 
-	log.Fatal(http.ListenAndServe(":8080", &sg))
+	log.Fatal(http.ListenAndServe(":8080", sg))
 }

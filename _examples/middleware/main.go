@@ -1,4 +1,4 @@
-package examples
+package main
 
 import (
 	"github.com/realbucksavage/stargate"
@@ -16,18 +16,22 @@ func main() {
 			"/ds_2": {"http://app2-sv1:8080"},
 		},
 	}
-	sg, err := stargate.NewProxy(l, stargate.RoundRobin, someMiddleware, middleware.LoggingMiddleware())
+	sg, err := stargate.NewRouter(
+		l,
+		stargate.WithMiddleware(someMiddleware, middleware.LoggingMiddleware()),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Fatal(http.ListenAndServe(":8080", &sg))
+	log.Fatal(http.ListenAndServe(":8080", sg))
 }
 
-func someMiddleware(next http.Handler) http.HandlerFunc {
+func someMiddleware(next http.Handler) http.Handler {
 	count := 0
-	return func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("count is not %d", count)
 		next.ServeHTTP(w, r)
 		count++
-	}
+	})
 }
