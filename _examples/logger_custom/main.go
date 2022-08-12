@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/pkg/listers"
+	"github.com/realbucksavage/stargate/listers"
 )
 
 type exampleLogger struct{}

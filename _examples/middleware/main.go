@@ -2,7 +2,8 @@ package main
 
 import (
 	"github.com/realbucksavage/stargate"
-	"github.com/realbucksavage/stargate/pkg/listers"
+	"github.com/realbucksavage/stargate/listers"
+
 	"github.com/realbucksavage/stargate/pkg/middleware"
 
 	"log"
