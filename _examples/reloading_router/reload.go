@@ -1,4 +1,4 @@
-package examples
+package reloading_router
 
 import (
 	"log"
@@ -16,7 +16,7 @@ func main() {
 			"/ds_1": {"http://localhost:8082"},
 		},
 	}
-	sg, err := stargate.NewProxy(&l, stargate.RoundRobin)
+	sg, err := stargate.NewRouter(&l)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func main() {
 	}()
 
 	log.Println("Starting server...")
-	log.Fatal(http.ListenAndServe(":7000", &sg))
+	log.Fatal(http.ListenAndServe(":7000", sg))
 }
 
 type customLister struct {

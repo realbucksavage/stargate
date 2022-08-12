@@ -3,7 +3,6 @@ package stargate
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -29,7 +28,11 @@ func TestServe(t *testing.T) {
 		t.Errorf("Cannot execute GET request : %v", err)
 	}
 
-	b, _ := ioutil.ReadAll(get.Body)
+	b, err := io.ReadAll(get.Body)
+	if err != nil {
+		t.Fatalf("cannot read response from server: %v", err)
+	}
+
 	resp := string(b)
 	if resp != okCode {
 		t.Errorf(`Expected "%s" but got "%s"`, okCode, resp)

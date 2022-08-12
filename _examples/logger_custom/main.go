@@ -1,4 +1,4 @@
-package examples
+package main
 
 import (
 	"log"
@@ -35,10 +35,10 @@ func main() {
 			"/ds_2": {"http://app2-sv1:8080"},
 		},
 	}
-	sg, err := stargate.NewProxy(l, stargate.RoundRobin)
+	sg, err := stargate.NewRouter(l)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Fatal(http.ListenAndServe(":8080", &sg))
+	log.Fatal(http.ListenAndServe(":8080", sg))
 }

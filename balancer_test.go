@@ -2,7 +2,7 @@ package stargate
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -35,22 +35,28 @@ func newLister(servers []*httptest.Server) ServiceLister {
 }
 
 func TestRoundRobin(t *testing.T) {
-	backends := make([]*httptest.Server, 0)
 	maxServers := 3
+	backends := make([]*httptest.Server, maxServers)
 
 	for i := 1; i <= maxServers; i++ {
 		n := fmt.Sprintf("server_%d", i)
-		backends = append(backends, httptest.NewServer(namedHandler(n)))
+		backends[i-1] = httptest.NewServer(namedHandler(n))
 		t.Logf("Named server %s ready", n)
 	}
 
+	defer func() {
+		for _, s := range backends {
+			s.Close()
+		}
+	}()
+
 	ls := newLister(backends)
-	sg, err := NewProxy(ls, RoundRobin)
+	sg, err := NewRouter(ls)
 	if err != nil {
 		t.Errorf("Cannot create stargate proxy : %v", err)
 	}
 
-	server := httptest.NewServer(&sg)
+	server := httptest.NewServer(sg)
 	defer server.Close()
 
 	t.Logf("Stargate ready at %s", server.Listener.Addr().String())
@@ -62,7 +68,11 @@ func TestRoundRobin(t *testing.T) {
 			t.Error(err)
 		}
 
-		b, _ := ioutil.ReadAll(get.Body)
+		b, err := io.ReadAll(get.Body)
+		if err != nil {
+			t.Fatalf("cannot read response from server %v", err)
+		}
+
 		resp := string(b)
 
 		expected := fmt.Sprintf("server_%d", j)
@@ -76,9 +86,5 @@ func TestRoundRobin(t *testing.T) {
 		}
 
 		t.Logf("> iter %d passed with response %s", i, resp)
-	}
-
-	for _, s := range backends {
-		s.Close()
 	}
 }
