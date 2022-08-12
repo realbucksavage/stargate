@@ -18,6 +18,7 @@ type downstreamRoute struct {
 	handler    http.Handler
 }
 
+// Router implements http.Handler and handles all requests that are to be reverse-proxied.
 type Router struct {
 	lister            ServiceLister
 	routes            []downstreamRoute
@@ -27,6 +28,7 @@ type Router struct {
 	mut sync.RWMutex
 }
 
+// NewRouter creates a Router instance out of the downstream services supplied by ServiceLister parameter.
 func NewRouter(lister ServiceLister, options ...RouterOption) (*Router, error) {
 
 	if lister == nil {
@@ -54,6 +56,7 @@ func NewRouter(lister ServiceLister, options ...RouterOption) (*Router, error) {
 	return router, nil
 }
 
+// Reload queries the ServiceLister used with NewRouter and creates the internal routing table used by ServeHTTP.
 func (r *Router) Reload() error {
 
 	routes, err := r.lister.ListAll()
