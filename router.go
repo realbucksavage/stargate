@@ -53,7 +53,7 @@ func NewRouter(lister ServiceLister, options ...RouterOption) (*Router, error) {
 	}
 
 	if err := router.Reload(); err != nil {
-		return nil, nil
+		return nil, errors.Wrap(err, "cannot initialize routes")
 	}
 
 	return router, nil
@@ -97,7 +97,11 @@ func (r *Router) Reload() error {
 	return nil
 }
 
-// ServeHTTP satisfies http.Handler
+// ServeHTTP satisfies http.Handler. It prioritizes full URL matches from the internal routing table, and tries until /
+// is reached. For example, to serve a request to https://somehost.com/some/test/url, ServeHTTP tries to look for URLs
+// in the routing table in this order ; /some/test/url -> /some/test -> /some -> /
+//
+// The downstream service pertaining to the first matched URL is picked and the request is reverse proxied to that.
 func (r *Router) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	r.mut.RLock()
