@@ -8,13 +8,12 @@ Stargate supports:
 - Eureka service registry
 - Middleware
 
+[stargatecontrb](https://github.com/realbucksavage/stargatecontrib) contains some middleware implementations that are
+not in the scope of this library, but might be useful for some people.
+
 ## Getting started
 
-Stargate's concept is to take in a table of routes and downstream services and create a load balancer that reverse
-proxies to them. This table is created by a `stargate.ServiceLister` instance and is passed to `stargate.NewProxy`
-function.
-
-Check the [basic example](https://github.com/realbucksavage/stargate/blob/master/_examples/basic.go) that implements a
+Check the [basic example](./_examples/basic/main.go) that implements a
 `stargate.ServiceLister` to create a static table of routes and uses round-robin approach to load balance the request.
 
 ### Customize logging
@@ -23,14 +22,14 @@ Stargate uses `stargate.Log` variable to write its logging output. This variable
 of `stargate.Logger`. You may write your own implementation of this interface and write `stargate.Log = myOwnLogger{}`
 whenever your program starts.
 
-Check the [custom logger example](https://github.com/realbucksavage/stargate/blob/master/_examples/custom_logger.go).
+Check the [custom logger example](./_examples/logger_custom/main.go).
 
 ### Using dynamic route tables.
 
-If the `stargate.ServiceLister`'s implementation updates the route table, the `stargate.Proxy` instance can be told to
+If the `stargate.ServiceLister`'s implementation updates the route table, the `stargate.Router` instance can be told to
 update the routing by calling the `Reload()` method.
 
-Check the [reloading routes example](https://github.com/realbucksavage/stargate/blob/master/_examples/reload.go).
+Check the [reloading routes example](./_examples/reloading_router/reload.go).
 
 #### Eureka service discovery
 
@@ -39,43 +38,20 @@ registered applications. Calling the `Reload()` method on `stargate.Proxy` insta
 eureka server and update the routes.
 
 ```go
-el := stargate.EurekaLister("http://localhost:8761/eureka")
+el := listers.Eureka("http://localhost:8761/eureka")
 ```
 
-Check the [eureka service discovery example](https://github.com/realbucksavage/stargate/blob/master/_examples/eureka.go).
-
-### Publishing statistics to `statsd`
-
-This can be done by using
-the [`StatsdMiddleware`](https://github.com/realbucksavage/stargate/blob/master/middleware/statsd.go#L21).
-
-```go
-mw := middleware.StatsdMiddleware("127.0.0.1:8125", "some_app.")
-sg, err := stargate.NewProxy(lister, stargate.RoundRobin, mw)
-```
-
-Refer the [example](https://github.com/realbucksavage/stargate/blob/master/_examples/statsd.go).
-
-> **NOTE**: As of now, the middleware publishes only response times and HTTP response rates.
-> Please use the issues board to request more stat integrations, or create a PR :smile:
+Check the [eureka service discovery example](./_examples/eureka/main.go).
 
 ### Middleware
 
-Stargate utlizes `MiddlewareFunc` from [gorilla/mux](https://github.com/gorilla/mux), which are defined as:
+Stargate defines middleware as:
 
 ```go
-type MiddlewareFunc func(next http.Handler) http.Handler
+type MiddlewareFunc func (http.Handler) http.Handler
 ```
 
-Any middleware to be applied must be passed to the `NewProxy` function like shown.
-
-```go
-sg, err := stargate.NewProxy(lister, balancers.RoundRobin, middleware1, middleware2)
-```
-
-Check the [middleware example](https://github.com/realbucksavage/stargate/blob/master/_examples/middleware.go). There's
-already one [middleware implemented in the `middleware` package](https://github.com/realbucksavage/stargate/blob/master/middleware/logger.go)
-that logs http responses and execution time.
+Check the [middleware example](./_examples/middleware/main.go), that counts the number of requests served.
 
 ## Open TODOs
 
