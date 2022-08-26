@@ -9,6 +9,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// MiddlewareFunc is a function that takes an http.Handler and returns another http.Handler. The returned http.Handler
+// is a closure that can call the passed in http.Handler to move the HTTP call forward. Optionally the returned closure
+// can do some extra processing - like authentication - with http.ResponseWriter and http.Request it receives.
 type MiddlewareFunc func(next http.Handler) http.Handler
 
 var errNoLister = errors.New("a lister is required")
@@ -94,6 +97,7 @@ func (r *Router) Reload() error {
 	return nil
 }
 
+// ServeHTTP satisfies http.Handler
 func (r *Router) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	r.mut.RLock()

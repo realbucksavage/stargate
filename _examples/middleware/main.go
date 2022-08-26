@@ -4,8 +4,6 @@ import (
 	"github.com/realbucksavage/stargate"
 	"github.com/realbucksavage/stargate/listers"
 
-	"github.com/realbucksavage/stargate/pkg/middleware"
-
 	"log"
 	"net/http"
 )
@@ -19,7 +17,7 @@ func main() {
 	}
 	sg, err := stargate.NewRouter(
 		l,
-		stargate.WithMiddleware(someMiddleware, middleware.LoggingMiddleware()),
+		stargate.WithMiddleware(someMiddleware),
 	)
 	if err != nil {
 		log.Fatal(err)
