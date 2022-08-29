@@ -7,7 +7,7 @@ import (
 	"github.com/hudl/fargo"
 	log "github.com/op/go-logging"
 
-	"github.com/realbucksavage/stargate/v1"
+	"github.com/realbucksavage/stargate"
 )
 
 type eurekaLister struct {

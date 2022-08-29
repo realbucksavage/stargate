@@ -1,4 +1,4 @@
-module github.com/realbucksavage/stargate/v1
+module github.com/realbucksavage/stargate
 
 go 1.17
 

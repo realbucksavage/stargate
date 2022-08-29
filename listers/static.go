@@ -1,6 +1,6 @@
 package listers
 
-import "github.com/realbucksavage/stargate/v1"
+import "github.com/realbucksavage/stargate"
 
 type Static struct {
 	Routes map[string][]string
