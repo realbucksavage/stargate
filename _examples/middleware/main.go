@@ -29,7 +29,7 @@ func main() {
 func someMiddleware(next http.Handler) http.Handler {
 	count := 0
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("count is not %d", count)
+		log.Printf("count is now %d", count)
 		next.ServeHTTP(w, r)
 		count++
 	})
