@@ -117,7 +117,9 @@ func (r *Router) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	rw.WriteHeader(http.StatusNotFound)
 	rw.Header().Set("content-type", "text/html")
-	rw.Write([]byte(`<h1>Page Not Found</h1><br><small>Stargate Router`))
+	if _, err := rw.Write([]byte(`<h1>Page Not Found</h1><br><small>Stargate Router`)); err != nil {
+		Log.Error("cannot write not found response to client: %v", err)
+	}
 }
 
 func (r *Router) createHandler(lb LoadBalancer, mwf ...MiddlewareFunc) http.Handler {
