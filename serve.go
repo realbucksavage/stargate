@@ -9,7 +9,7 @@ func serve(lb LoadBalancer) http.Handler {
 		if lb.Length() > 0 {
 			serverCount := 0
 			for sv := lb.NextServer(); serverCount < lb.Length(); sv = lb.NextServer() {
-				if sv.IsAlive() {
+				if sv.IsAlive(r.Context()) {
 					server = sv
 					break
 				}

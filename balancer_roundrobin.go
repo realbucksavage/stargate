@@ -54,17 +54,14 @@ func (r *roundRobinBalancer) createRoutes(svc []string, director DirectorFunc) e
 }
 
 func createProxy(s string, director DirectorFunc) (DownstreamServer, error) {
-	var localServer DownstreamServer
-
 	origin, err := url.Parse(s)
 	if err != nil {
 		return DownstreamServer{}, err
 	}
 
-	localServer.BaseURL = s
-	localServer.Alive = localServer.IsAlive()
-	localServer.Backend = &httputil.ReverseProxy{
-		Director: director(origin),
-	}
-	return localServer, nil
+	return DownstreamServer{
+		BaseURL: s,
+		Alive:   false,
+		Backend: &httputil.ReverseProxy{Director: director(origin)},
+	}, nil
 }
