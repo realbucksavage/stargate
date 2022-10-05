@@ -1,0 +1,19 @@
+version: 2.1
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/golang:1.17-stretch
+    steps:
+      - checkout
+      - run:
+          name: Generate Coverage Report
+          command: go test -v ./... -coverprofile=coverage.txt -covermode=atomic
+      - run:
+          name: Upload to codecov
+          command: bash <(curl -s https://codecov.io/bash) 
+
+workflows:
+  run_go_test:
+    jobs:
+      - build
