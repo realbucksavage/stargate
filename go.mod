@@ -11,7 +11,10 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
-require github.com/pkg/errors v0.9.1
+require (
+	github.com/gorilla/websocket v1.5.0
+	github.com/pkg/errors v0.9.1
+)
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
