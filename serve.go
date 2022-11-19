@@ -4,17 +4,18 @@ import "net/http"
 
 func serve(lb LoadBalancer) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var server *DownstreamServer
+		var server DownstreamServer
 
 		if lb.Length() > 0 {
 			serverCount := 0
 			for sv := lb.NextServer(); serverCount < lb.Length(); sv = lb.NextServer() {
-				if sv.IsAlive(r.Context()) {
+				if err := sv.Healthy(r.Context()); err == nil {
 					server = sv
 					break
+				} else {
+					Log.Debug("backend %q is not alive: %v", sv.Address(), err)
+					serverCount++
 				}
-				Log.Debug("Backend %s is not alive. Skipped.", sv.BaseURL)
-				serverCount++
 			}
 		}
 
@@ -31,7 +32,7 @@ func serve(lb LoadBalancer) http.Handler {
 			return
 		}
 
-		Log.Debug("Resolved backend %s", server.BaseURL)
-		server.Backend.ServeHTTP(w, r)
+		Log.Debug("Resolved backend %s", server.Address())
+		server.ServeHTTP(w, r)
 	})
 }
