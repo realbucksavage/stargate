@@ -1,11 +1,13 @@
 # Stargate
 
-A minimal and extensible library to build gateway servers.
+A minimal and extensible library to build gateway servers. Stargate aims to be simple while providing niche solutions
+like several load balancer implementations, middleware, service discovery, etc.
 
 Stargate supports:
 
+- WebSockets
 - Hot-reloading of routes
-- Eureka service registry
+- Eureka service registry (soon to be moved to `stargatecontrb`)
 - Middleware
 
 [stargatecontrb](https://github.com/realbucksavage/stargatecontrib) contains some middleware implementations that are
@@ -15,6 +17,8 @@ not in the scope of this library, but might be useful for some people.
 
 Check the [basic example](./_examples/basic/main.go) that implements a
 `stargate.ServiceLister` to create a static table of routes and uses round-robin approach to load balance the request.
+
+In the same sprits, the [WebSockets example](./_examples/websockets/main.go) shows a simple WebSocket backend.
 
 ### Customize logging
 
@@ -57,13 +61,9 @@ Check the [middleware example](./_examples/middleware/main.go), that counts the 
 
 - Improve logging
 - Improve documentation
-- Write tests
-- WebSockets
-
-#### `ServiceLister` implementations
-
-- Etcd
-- Consuul
+- Write more tests
+- Implementation of director functions in WebSockets reverse proxy.
+- Customizable healthchecks
 
 #### `LoadBalancer` implementations
 
