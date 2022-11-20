@@ -13,7 +13,7 @@ func TestServe(t *testing.T) {
 	backend := httptest.NewServer(namedHandler(okCode))
 	defer backend.Close()
 
-	backends := []string{toUrl(backend, "protocol")}
+	backends := []string{toUrl(backend, "http")}
 	roundRobin, err := RoundRobin(backends, defaultDirector("/"))
 	if err != nil {
 		t.Errorf("Cannot create roundRobin LB : %v", err)
