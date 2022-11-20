@@ -9,7 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-// DownstreamServer is a backend service to connect downstream
+var errUnknownScheme = errors.New("unknown scheme")
+
+// DownstreamServer is an abstraction for Stargate that represents the server to be reverse proxied.
+// Implemented by httpDownstream and websocketDownstream.
 type DownstreamServer interface {
 	http.Handler
 	Address() string
@@ -35,5 +38,5 @@ func NewDownstreamServer(address string, director DirectorFunc) (DownstreamServe
 		return &websocketDownstream{address}, nil
 	}
 
-	return nil, errors.Errorf("unknown scheme %q (only http, https, ws, and wss are supported)", scheme)
+	return nil, errors.Wrap(errUnknownScheme, scheme)
 }
