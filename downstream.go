@@ -12,13 +12,16 @@ import (
 var errUnknownScheme = errors.New("unknown scheme")
 
 // DownstreamServer is an abstraction for Stargate that represents the server to be reverse proxied.
-// Implemented by httpDownstream and websocketDownstream.
+// NewDownstreamServer returns an appropriate implementation of this interface.
 type DownstreamServer interface {
 	http.Handler
 	Address() string
 	Healthy(ctx context.Context) error
 }
 
+// NewDownstreamServer returns a DownstreamServer implementation backed by http or WebSockets, depending
+// on the protocol of the passed address. The address to be passed must have http, https, ws, or wss
+// protocol. Anything else passed to this function will make it return an "unknown scheme" error.
 func NewDownstreamServer(address string, director DirectorFunc) (DownstreamServer, error) {
 	origin, err := url.Parse(address)
 	if err != nil {
