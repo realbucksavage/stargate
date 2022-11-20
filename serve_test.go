@@ -13,7 +13,7 @@ func TestServe(t *testing.T) {
 	backend := httptest.NewServer(namedHandler(okCode))
 	defer backend.Close()
 
-	backends := []string{toUrl(backend)}
+	backends := []string{toUrl(backend, "protocol")}
 	roundRobin, err := RoundRobin(backends, defaultDirector("/"))
 	if err != nil {
 		t.Errorf("Cannot create roundRobin LB : %v", err)
@@ -23,7 +23,7 @@ func TestServe(t *testing.T) {
 	defer server.Close()
 
 	client := &http.Client{}
-	get, err := client.Get(toUrl(server))
+	get, err := client.Get(toUrl(server, "http"))
 	if err != nil {
 		t.Errorf("Cannot execute GET request : %v", err)
 	}
@@ -48,6 +48,6 @@ func namedHandler(name string) http.HandlerFunc {
 	}
 }
 
-func toUrl(s *httptest.Server) string {
-	return fmt.Sprintf("http://%s", s.Listener.Addr().String())
+func toUrl(s *httptest.Server, protocol string) string {
+	return fmt.Sprintf("%s://%s", protocol, s.Listener.Addr().String())
 }

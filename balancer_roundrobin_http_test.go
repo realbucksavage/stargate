@@ -20,11 +20,11 @@ func (h httptestLister) ListAll() (map[string][]string, error) {
 	return h.routes, nil
 }
 
-func newLister(servers []*httptest.Server) ServiceLister {
+func newLister(servers []*httptest.Server, protocol string) ServiceLister {
 	sv := make([]string, 0)
 
 	for _, s := range servers {
-		sv = append(sv, toUrl(s))
+		sv = append(sv, toUrl(s, protocol))
 	}
 
 	return httptestLister{
@@ -34,7 +34,7 @@ func newLister(servers []*httptest.Server) ServiceLister {
 	}
 }
 
-func TestRoundRobin(t *testing.T) {
+func TestRoundRobinHTTP(t *testing.T) {
 	maxServers := 3
 	backends := make([]*httptest.Server, maxServers)
 
@@ -50,7 +50,7 @@ func TestRoundRobin(t *testing.T) {
 		}
 	}()
 
-	ls := newLister(backends)
+	ls := newLister(backends, "ws")
 	sg, err := NewRouter(ls)
 	if err != nil {
 		t.Errorf("Cannot create stargate proxy : %v", err)
@@ -63,7 +63,7 @@ func TestRoundRobin(t *testing.T) {
 
 	client := &http.Client{}
 	for i, j := 1, 1; i < 10; i++ {
-		get, err := client.Get(toUrl(server))
+		get, err := client.Get(toUrl(server, "protocol"))
 		if err != nil {
 			t.Error(err)
 		}
