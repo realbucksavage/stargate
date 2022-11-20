@@ -26,6 +26,11 @@ func namedWebsocketServer(name string) http.HandlerFunc {
 			log.Printf("%s: message preparation error: %v", name, err)
 			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
+
+		err = client.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		if err != nil {
+			log.Printf("cannot send close message to client websocket: %v", err)
+		}
 	}
 }
 
@@ -64,7 +69,6 @@ func TestRoundRobinWebSockets(t *testing.T) {
 		if err != nil {
 			t.Fatalf("cannot read message: %v", err)
 		}
-		client.Close()
 
 		t.Logf("> iteration %d: message: %s", i, (msg))
 
