@@ -50,7 +50,7 @@ func TestRoundRobinHTTP(t *testing.T) {
 		}
 	}()
 
-	ls := newLister(backends, "ws")
+	ls := newLister(backends, "http")
 	sg, err := NewRouter(ls)
 	if err != nil {
 		t.Errorf("Cannot create stargate proxy : %v", err)
@@ -63,7 +63,7 @@ func TestRoundRobinHTTP(t *testing.T) {
 
 	client := &http.Client{}
 	for i, j := 1, 1; i < 10; i++ {
-		get, err := client.Get(toUrl(server, "protocol"))
+		get, err := client.Get(toUrl(server, "http"))
 		if err != nil {
 			t.Error(err)
 		}
