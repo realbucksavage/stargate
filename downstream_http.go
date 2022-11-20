@@ -33,11 +33,6 @@ func (h *httpDownstream) Healthy(ctx context.Context) error {
 		return err
 	}
 
-	if u.Scheme == "" {
-		Log.Warn("no scheme specified in %s, assuming http", h.url)
-		u.Scheme = "http"
-	}
-
 	Log.Debug("checking if %q is up...", u)
 
 	req, err := http.NewRequest("GET", u.String(), nil)
