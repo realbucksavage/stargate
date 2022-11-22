@@ -60,7 +60,7 @@ func TestRoundRobinWebSockets(t *testing.T) {
 	defer server.Close()
 
 	for i, j := 1, 1; i < 10; i++ {
-		client, _, err := websocket.DefaultDialer.Dial(toUrl(server, "ws")+"/test", nil)
+		client, _, err := websocket.DefaultDialer.Dial(toUrl(server, "ws"), nil)
 		if err != nil {
 			t.Fatalf("cannot create dialer: %v", err)
 		}
