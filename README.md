@@ -62,7 +62,6 @@ Check the [middleware example](./_examples/middleware/main.go), that counts the 
 - Improve logging
 - Improve documentation
 - Write more tests
-- Implementation of director functions in WebSockets reverse proxy.
 - Customizable healthchecks
 
 #### `LoadBalancer` implementations

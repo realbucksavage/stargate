@@ -12,7 +12,8 @@ import (
 )
 
 type websocketDownstream struct {
-	url string
+	url      string
+	director func(*http.Request)
 }
 
 func (w *websocketDownstream) Healthy(_ context.Context) error {
@@ -65,7 +66,15 @@ func (w *websocketDownstream) ServeHTTP(rw http.ResponseWriter, req *http.Reques
 		requestHeader.Set("X-Forwarded-Proto", "https")
 	}
 
-	downstreamConnection, downstreamResp, err := websocket.DefaultDialer.Dial(w.url, requestHeader)
+	cloned := req.Clone(req.Context())
+	w.director(cloned)
+
+	destAddress := w.url
+	if cloned.URL.Path != "" {
+		destAddress = destAddress + "/" + cloned.URL.Path
+	}
+
+	downstreamConnection, downstreamResp, err := websocket.DefaultDialer.Dial(destAddress, requestHeader)
 	if err != nil {
 		Log.Debug("cannot connect to downstream server: %v", err)
 		if downstreamResp != nil {

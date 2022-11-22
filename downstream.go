@@ -28,17 +28,22 @@ func NewDownstreamServer(address string, director DirectorFunc) (DownstreamServe
 		return nil, err
 	}
 
+	directorFunc := director(origin)
+
 	scheme := origin.Scheme
 	if scheme == "http" || scheme == "https" {
 		return &httpDownstream{
 			url:     address,
-			backend: &httputil.ReverseProxy{Director: director(origin)},
+			backend: &httputil.ReverseProxy{Director: directorFunc},
 			alive:   false,
 		}, nil
 	}
 
 	if scheme == "ws" || scheme == "wss" {
-		return &websocketDownstream{address}, nil
+		return &websocketDownstream{
+			url:      address,
+			director: directorFunc,
+		}, nil
 	}
 
 	return nil, errors.Wrap(errUnknownScheme, scheme)
