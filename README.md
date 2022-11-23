@@ -7,7 +7,6 @@ Stargate supports:
 
 - WebSockets
 - Hot-reloading of routes
-- Eureka service registry (soon to be moved to `stargatecontrb`)
 - Middleware
 
 [stargatecontrb](https://github.com/realbucksavage/stargatecontrib) contains some middleware implementations that are
@@ -37,15 +36,7 @@ Check the [reloading routes example](./_examples/reloading_router/reload.go).
 
 #### Eureka service discovery
 
-`stargate.EurekaLister(string)` returns a `ServiceLister` instance that queries the specified eureka server for
-registered applications. Calling the `Reload()` method on `stargate.Proxy` instance causes the Eureka lister to query
-eureka server and update the routes.
-
-```go
-el := listers.Eureka("http://localhost:8761/eureka")
-```
-
-Check the [eureka service discovery example](./_examples/eureka/main.go).
+Check the [eureka package in stargatecontrib](https://github.com/realbucksavage/stargatecontrib/tree/main/lister/eureka).
 
 ### Middleware
 
