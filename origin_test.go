@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNewDownstreamServer(t *testing.T) {
+func TestNewOriginServer(t *testing.T) {
 
 	tests := []struct {
 		name    string
@@ -13,6 +13,7 @@ func TestNewDownstreamServer(t *testing.T) {
 		err     error
 	}{
 		{"check for unsupported schemes", "invalid://some-address", errUnknownScheme},
+		{"check that URLs without a scheme return an error", "some-address", errUnknownScheme},
 		{"check that http servers are created", "http://some-address", nil},
 		{"check that https servers are created", "https://some-address", nil},
 		{"check that websocket servers are created", "ws://some-address", nil},

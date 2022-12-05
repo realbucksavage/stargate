@@ -22,6 +22,11 @@ func (r *roundRobinBalancer) Length() int {
 	return len(r.servers)
 }
 
+// Name returns the name of this LoadBalancer.
+func (r *roundRobinBalancer) Name() string {
+	return "Stargate/RoundRobin"
+}
+
 // RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
 func RoundRobin(svc []string, director DirectorFunc) (LoadBalancer, error) {
 	r := &roundRobinBalancer{}
