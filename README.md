@@ -1,3 +1,7 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/realbucksavage/stargate.svg)](https://pkg.go.dev/github.com/realbucksavage/stargate)
+[![codecov](https://codecov.io/gh/realbucksavage/stargate/branch/main/graph/badge.svg?token=QCRZ7IT8Y3)](https://codecov.io/gh/realbucksavage/stargate)
+[Report Card](https://www.goreportcard.com/report/github.com/realbucksavage/stargate)
+
 # Stargate
 
 A minimal and extensible library to build gateway servers. Stargate aims to be simple while providing niche solutions
@@ -57,4 +61,4 @@ Check the [middleware example](./_examples/middleware/main.go), that counts the 
 
 #### `LoadBalancer` implementations
 
-- Priority round robin
+- Priority round-robin
