@@ -11,18 +11,18 @@ import (
 
 var errUnknownScheme = errors.New("unknown scheme")
 
-// DownstreamServer is an abstraction for Stargate that represents the server to be reverse proxied.
+// OriginServer is an abstraction for Stargate that represents the server to be reverse proxied.
 // NewDownstreamServer returns an appropriate implementation of this interface.
-type DownstreamServer interface {
+type OriginServer interface {
 	http.Handler
 	Address() string
 	Healthy(ctx context.Context) error
 }
 
-// NewDownstreamServer returns a DownstreamServer implementation backed by http or WebSockets, depending
+// NewOriginServer returns a DownstreamServer implementation backed by http or WebSockets, depending
 // on the protocol of the passed address. The address to be passed must have http, https, ws, or wss
 // protocol. Anything else passed to this function will make it return an "unknown scheme" error.
-func NewDownstreamServer(address string, director DirectorFunc) (DownstreamServer, error) {
+func NewOriginServer(address string, director DirectorFunc) (OriginServer, error) {
 	origin, err := url.Parse(address)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func NewDownstreamServer(address string, director DirectorFunc) (DownstreamServe
 
 	scheme := origin.Scheme
 	if scheme == "http" || scheme == "https" {
-		return &httpDownstream{
+		return &httpOriginServer{
 			url:     address,
 			backend: &httputil.ReverseProxy{Director: directorFunc},
 			alive:   false,
@@ -40,7 +40,7 @@ func NewDownstreamServer(address string, director DirectorFunc) (DownstreamServe
 	}
 
 	if scheme == "ws" || scheme == "wss" {
-		return &websocketDownstream{
+		return &websocketOriginServer{
 			url:      address,
 			director: directorFunc,
 		}, nil
