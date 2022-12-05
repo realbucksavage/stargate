@@ -11,21 +11,21 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type websocketDownstream struct {
+type websocketOriginServer struct {
 	url      string
 	director func(*http.Request)
 }
 
-func (w *websocketDownstream) Healthy(_ context.Context) error {
+func (w *websocketOriginServer) Healthy(_ context.Context) error {
 	// TODO: Implement websocket healthchecks
 	return nil
 }
 
-func (w *websocketDownstream) Address() string {
+func (w *websocketOriginServer) Address() string {
 	return w.url
 }
 
-func (w *websocketDownstream) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	requestHeader := http.Header{}
 	if origin := req.Header.Get("Origin"); origin != "" {

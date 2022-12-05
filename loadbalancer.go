@@ -4,7 +4,7 @@ package stargate
 type LoadBalancer interface {
 
 	// NextServer returns an instance of *DownstreamServer that should be used to serve and http request.
-	NextServer() DownstreamServer
+	NextServer() OriginServer
 
 	// Length returns how many downstream servers are available.
 	Length() int
