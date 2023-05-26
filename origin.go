@@ -19,9 +19,9 @@ type OriginServer interface {
 	Healthy(ctx context.Context) error
 }
 
-// NewOriginServer returns a DownstreamServer implementation backed by http or WebSockets, depending
-// on the protocol of the passed address. The address to be passed must have http, https, ws, or wss
-// protocol. Anything else passed to this function will make it return an "unknown scheme" error.
+// NewOriginServer returns a DownstreamServer implementation backed by HTTP or WebSockets, depending
+// on the RouteOptions' address. The said address must have http, https, ws, or wss protocol. Anything
+// else passed to this function will make it return an "unknown scheme" error.
 func NewOriginServer(routeOptions *RouteOptions, director DirectorFunc) (OriginServer, error) {
 	origin, err := url.Parse(routeOptions.Address)
 	if err != nil {

@@ -80,7 +80,7 @@ func (r *Router) Reload() error {
 		for _, routeOption := range routeOptions {
 			sv, err := NewOriginServer(routeOption, defaultDirector(route))
 			if err != nil {
-				return err
+				return errors.Wrapf(err, "cannot create an origin server pointing to %q for route %q", route, routeOption.Address)
 			}
 
 			servers = append(servers, sv)
@@ -88,7 +88,7 @@ func (r *Router) Reload() error {
 
 		lb, err := r.loadBalancerMaker(servers)
 		if err != nil {
-			return errors.Wrapf(err, "cannot create load balancer to downstream service %v", routeOptions)
+			return errors.Wrapf(err, "cannot create load balancer for route %q", route)
 		}
 
 		handler := r.createHandler(lb, r.middlewareFuncs...)
