@@ -22,10 +22,10 @@ func TestRouting(t *testing.T) {
 		defer backend3.Close()
 
 		lister := httptestLister{
-			routes: map[string][]string{
-				"/backends/2": {toUrl(backend2, "http")},
-				"/backends/1": {toUrl(backend1, "http")},
-				"/backends":   {toUrl(backend3, "http")},
+			routes: map[string][]*RouteOptions{
+				"/backends/2": {makeRouteOption(backend2, "http")},
+				"/backends/1": {makeRouteOption(backend1, "http")},
+				"/backends":   {makeRouteOption(backend3, "http")},
 			},
 		}
 
@@ -54,7 +54,7 @@ func TestRouting(t *testing.T) {
 		{"/backends/2/test", "/backends/2/"},
 	}
 
-	baseURL := toUrl(server, "http")
+	baseURL := makeRouteOption(server, "http").Address
 	for _, tc := range table {
 		u := fmt.Sprintf("%s%s", baseURL, tc.input)
 		get, err := http.DefaultClient.Get(u)

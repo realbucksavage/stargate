@@ -13,6 +13,5 @@ type LoadBalancer interface {
 	Name() string
 }
 
-// LoadBalancerMaker takes in the addresses of downstream servers in a []string. The func(*http.Request) returned by
-// DirectorFunc is used for the Director of httputil.ReverseProxy.
-type LoadBalancerMaker func([]string, DirectorFunc) (LoadBalancer, error)
+// LoadBalancerMaker creates a LoadBalancer from the input OriginServer slice.
+type LoadBalancerMaker func([]OriginServer) (LoadBalancer, error)

@@ -22,7 +22,7 @@ func TestNewOriginServer(t *testing.T) {
 
 	for _, test := range tests {
 		t.Logf("running test %q", test.name)
-		_, err := NewOriginServer(test.address, defaultDirector("/"))
+		_, err := NewOriginServer(&RouteOptions{Address: test.address}, defaultDirector("/"))
 		if err != nil {
 			if test.err == nil {
 				t.Fatalf("NewDownstreamServer unexpectedly returned an error: %v", err)

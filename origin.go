@@ -22,8 +22,8 @@ type OriginServer interface {
 // NewOriginServer returns a DownstreamServer implementation backed by http or WebSockets, depending
 // on the protocol of the passed address. The address to be passed must have http, https, ws, or wss
 // protocol. Anything else passed to this function will make it return an "unknown scheme" error.
-func NewOriginServer(address string, director DirectorFunc) (OriginServer, error) {
-	origin, err := url.Parse(address)
+func NewOriginServer(routeOptions *RouteOptions, director DirectorFunc) (OriginServer, error) {
+	origin, err := url.Parse(routeOptions.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func NewOriginServer(address string, director DirectorFunc) (OriginServer, error
 	scheme := origin.Scheme
 	if scheme == "http" || scheme == "https" {
 		return &httpOriginServer{
-			url:     address,
+			url:     routeOptions.Address,
 			backend: &httputil.ReverseProxy{Director: directorFunc},
 			alive:   false,
 		}, nil
@@ -41,7 +41,7 @@ func NewOriginServer(address string, director DirectorFunc) (OriginServer, error
 
 	if scheme == "ws" || scheme == "wss" {
 		return &websocketOriginServer{
-			url:      address,
+			url:      routeOptions.Address,
 			director: directorFunc,
 		}, nil
 	}

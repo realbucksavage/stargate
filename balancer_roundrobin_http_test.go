@@ -9,26 +9,26 @@ import (
 )
 
 type httptestLister struct {
-	routes map[string][]string
+	routes map[string][]*RouteOptions
 }
 
-func (h httptestLister) List(s string) ([]string, error) {
+func (h httptestLister) List(s string) ([]*RouteOptions, error) {
 	return h.routes[s], nil
 }
 
-func (h httptestLister) ListAll() (map[string][]string, error) {
+func (h httptestLister) ListAll() (map[string][]*RouteOptions, error) {
 	return h.routes, nil
 }
 
 func newLister(servers []*httptest.Server, protocol string) ServiceLister {
-	sv := make([]string, 0)
+	sv := make([]*RouteOptions, 0)
 
 	for _, s := range servers {
-		sv = append(sv, toUrl(s, protocol))
+		sv = append(sv, makeRouteOption(s, protocol))
 	}
 
 	return httptestLister{
-		routes: map[string][]string{
+		routes: map[string][]*RouteOptions{
 			"/": sv,
 		},
 	}
@@ -63,7 +63,7 @@ func TestRoundRobinHTTP(t *testing.T) {
 
 	client := &http.Client{}
 	for i, j := 1, 1; i < 10; i++ {
-		get, err := client.Get(toUrl(server, "http"))
+		get, err := client.Get(makeRouteOption(server, "http").Address)
 		if err != nil {
 			t.Error(err)
 		}

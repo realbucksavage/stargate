@@ -24,7 +24,17 @@ func TestRoundRobin(t *testing.T) {
 		t.Fatalf("cannot list routes: %v", err)
 	}
 
-	lb, err := RoundRobin(routes, defaultDirector("/"))
+	servers := make([]OriginServer, 0)
+	for _, options := range routes {
+		server, err := NewOriginServer(options, defaultDirector("/"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		servers = append(servers, server)
+	}
+
+	lb, err := RoundRobin(servers)
 	if err != nil {
 		t.Fatalf("cannot create round robin balancer: %v", err)
 	}

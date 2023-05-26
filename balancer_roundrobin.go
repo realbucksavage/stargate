@@ -28,27 +28,6 @@ func (r *roundRobinBalancer) Name() string {
 }
 
 // RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
-func RoundRobin(svc []string, director DirectorFunc) (LoadBalancer, error) {
-	r := &roundRobinBalancer{}
-	if err := r.createRoutes(svc, director); err != nil {
-		return nil, err
-	}
-
-	return r, nil
-}
-
-func (r *roundRobinBalancer) createRoutes(svc []string, director DirectorFunc) error {
-	r.servers = []OriginServer{}
-
-	for _, s := range svc {
-		localServer, err := NewOriginServer(s, director)
-		if err != nil {
-			return err
-		}
-
-		r.servers = append(r.servers, localServer)
-	}
-	r.latest = -1
-
-	return nil
+func RoundRobin(servers []OriginServer) (LoadBalancer, error) {
+	return &roundRobinBalancer{servers: servers, latest: -1}, nil
 }

@@ -41,7 +41,17 @@ func TestWithLoadBalancer(t *testing.T) {
 			t.Fatalf("cannot query routes: %v", err)
 		}
 
-		lb, err := router.loadBalancerMaker(rs, defaultDirector("/"))
+		servers := make([]OriginServer, 0)
+		for _, options := range rs {
+			server, err := NewOriginServer(options, defaultDirector("/"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			servers = append(servers, server)
+		}
+
+		lb, err := router.loadBalancerMaker(servers)
 		if err != nil {
 			t.Fatalf("cannot create lb: %v", err)
 		}
