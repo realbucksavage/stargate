@@ -1,7 +1,7 @@
 package stargate
 
 import (
-	"context"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -14,9 +14,11 @@ var errUnknownScheme = errors.New("unknown scheme")
 // OriginServer is an abstraction for Stargate that represents the server to be reverse proxied.
 // NewDownstreamServer returns an appropriate implementation of this interface.
 type OriginServer interface {
+	io.Closer
 	http.Handler
 	Address() string
-	Healthy(ctx context.Context) error
+	Healthy() bool
+	startHealthCheck(options *HealthCheckOptions)
 }
 
 // NewOriginServer returns a DownstreamServer implementation backed by HTTP or WebSockets, depending
@@ -30,21 +32,26 @@ func NewOriginServer(routeOptions *RouteOptions, director DirectorFunc) (OriginS
 
 	directorFunc := director(origin)
 
-	scheme := origin.Scheme
-	if scheme == "http" || scheme == "https" {
-		return &httpOriginServer{
+	var server OriginServer
+	switch origin.Scheme {
+	case "http", "https":
+		server = &httpOriginServer{
 			url:     routeOptions.Address,
 			backend: &httputil.ReverseProxy{Director: directorFunc},
 			alive:   false,
-		}, nil
-	}
-
-	if scheme == "ws" || scheme == "wss" {
-		return &websocketOriginServer{
+		}
+	case "ws", "wss":
+		server = &websocketOriginServer{
 			url:      routeOptions.Address,
 			director: directorFunc,
-		}, nil
+		}
+	default:
+		return nil, errors.Wrap(errUnknownScheme, origin.Scheme)
 	}
 
-	return nil, errors.Wrap(errUnknownScheme, scheme)
+	if routeOptions.HealthCheck != nil {
+		go server.startHealthCheck(routeOptions.HealthCheck)
+	}
+
+	return server, nil
 }

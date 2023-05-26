@@ -9,13 +9,14 @@ func serve(lb LoadBalancer) http.Handler {
 		if lb.Length() > 0 {
 			serverCount := 0
 			for sv := lb.NextServer(); serverCount < lb.Length(); sv = lb.NextServer() {
-				if err := sv.Healthy(r.Context()); err == nil {
-					server = sv
-					break
-				} else {
-					Log.Debug("backend %q is not alive: %v", sv.Address(), err)
+				if !sv.Healthy() {
+					Log.Debug("origin %q is not healthy", sv.Address())
 					serverCount++
+					continue
 				}
+
+				server = sv
+				break
 			}
 		}
 

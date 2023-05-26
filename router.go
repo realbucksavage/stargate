@@ -19,6 +19,7 @@ var errNoLister = errors.New("a lister is required")
 type originRoute struct {
 	pathPrefix string
 	handler    http.Handler
+	servers    []OriginServer
 }
 
 // Router implements http.Handler and handles all requests that are to be reverse-proxied.
@@ -92,7 +93,7 @@ func (r *Router) Reload() error {
 		}
 
 		handler := r.createHandler(lb, r.middlewareFuncs...)
-		newRoutes = append(newRoutes, originRoute{pathPrefix: route, handler: handler})
+		newRoutes = append(newRoutes, originRoute{pathPrefix: route, handler: handler, servers: servers})
 		mappedRoutes[route] = struct{}{}
 
 		Log.Debug("Route initialized - %s -> %s", route, routeOptions)
@@ -101,6 +102,7 @@ func (r *Router) Reload() error {
 	sort.SliceStable(newRoutes, func(i, j int) bool { return newRoutes[i].pathPrefix > newRoutes[j].pathPrefix })
 
 	r.mut.Lock()
+	defer closeServers(r.routes)
 	r.routes = newRoutes
 	r.mut.Unlock()
 
@@ -140,4 +142,14 @@ func (r *Router) createHandler(lb LoadBalancer, mwf ...MiddlewareFunc) http.Hand
 	}
 
 	return handler
+}
+
+func closeServers(routes []originRoute) {
+	for i := range routes {
+		for _, server := range routes[i].servers {
+			if err := server.Close(); err != nil {
+				Log.Warn("cannot close origin server %q: %v", server.Address(), err)
+			}
+		}
+	}
 }

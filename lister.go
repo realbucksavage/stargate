@@ -1,7 +1,15 @@
 package stargate
 
 import (
+	"net/http"
 	"time"
+)
+
+const (
+	DefaultHealthCheckPath     = "/"
+	DefaultHealthCheckStatus   = http.StatusOK
+	DefaultHealthCheckInterval = 30 * time.Second
+	DefaultHealthCheckTimeout  = 10 * time.Second
 )
 
 // RouteOptions defines the configuration of a route.
