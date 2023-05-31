@@ -6,16 +6,19 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
 )
 
 type httpOriginServer struct {
-	url          string
-	backend      *httputil.ReverseProxy
-	alive        bool
-	healthTicker *time.Ticker
+	url     string
+	backend *httputil.ReverseProxy
+
+	hcMut              sync.RWMutex
+	alive              bool
+	healthCheckRunning bool
 }
 
 func (origin *httpOriginServer) Address() string {
@@ -27,7 +30,10 @@ func (origin *httpOriginServer) ServeHTTP(rw http.ResponseWriter, r *http.Reques
 }
 
 func (origin *httpOriginServer) Healthy() bool {
-	if origin.healthTicker == nil {
+	origin.hcMut.RLock()
+	defer origin.hcMut.RUnlock()
+
+	if !origin.healthCheckRunning {
 		return true
 	}
 
@@ -36,8 +42,8 @@ func (origin *httpOriginServer) Healthy() bool {
 
 func (origin *httpOriginServer) Close() error {
 	Log.Debug("stopping health checker to %q", origin.url)
+	origin.healthCheckRunning = false
 	origin.alive = false
-	origin.healthTicker.Stop()
 	return nil
 }
 
@@ -63,13 +69,22 @@ func (origin *httpOriginServer) startHealthCheck(options *HealthCheckOptions) {
 	}
 
 	Log.Debug("pinging %q every %v at %q with a timeout of %v", origin.url, interval, path, timeout)
-	origin.healthTicker = time.NewTicker(interval)
-	for {
-		if err := origin.checkHealth(path, okStatus, timeout); err != nil {
+	healthTicker := time.NewTicker(interval)
+	defer healthTicker.Stop()
+
+	origin.healthCheckRunning = true
+	for origin.healthCheckRunning {
+		err := origin.checkHealth(path, okStatus, timeout)
+
+		if err != nil {
 			Log.Error("%q: healthcheck failed: %v", origin.url, err)
-			origin.alive = false
 		}
-		<-origin.healthTicker.C
+
+		origin.hcMut.Lock()
+		origin.alive = err == nil
+		origin.hcMut.Unlock()
+
+		<-healthTicker.C
 	}
 }
 

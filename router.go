@@ -81,7 +81,7 @@ func (r *Router) Reload() error {
 		for _, routeOption := range routeOptions {
 			sv, err := NewOriginServer(routeOption, defaultDirector(route))
 			if err != nil {
-				return errors.Wrapf(err, "cannot create an origin server pointing to %q for route %q", route, routeOption.Address)
+				return errors.Wrapf(err, "cannot create an origin server pointing to %q for route %q", routeOption.Address, route)
 			}
 
 			servers = append(servers, sv)
