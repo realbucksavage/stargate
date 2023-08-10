@@ -104,6 +104,7 @@ func (w *websocketDownstream) ServeHTTP(rw http.ResponseWriter, req *http.Reques
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
 		EnableCompression: true,
+		CheckOrigin:       func(*http.Request) bool { return true },
 	}
 
 	clientConn, err := upgrader.Upgrade(rw, req, upgradeHeader)
