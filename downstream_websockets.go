@@ -71,7 +71,7 @@ func (w *websocketDownstream) ServeHTTP(rw http.ResponseWriter, req *http.Reques
 
 	destAddress := w.url
 	if cloned.URL.Path != "" {
-		destAddress = destAddress + "/" + cloned.URL.Path
+		destAddress = destAddress + cloned.URL.Path
 	}
 
 	downstreamConnection, downstreamResp, err := websocket.DefaultDialer.Dial(destAddress, requestHeader)
