@@ -1,12 +1,12 @@
 package stargate
 
 type roundRobinBalancer struct {
-	servers []DownstreamServer
+	servers []OriginServer
 	latest  int
 }
 
 // NextServer returns the next server that should serve the request.
-func (r *roundRobinBalancer) NextServer() DownstreamServer {
+func (r *roundRobinBalancer) NextServer() OriginServer {
 	if len(r.servers) == 0 {
 		return nil
 	}
@@ -22,6 +22,11 @@ func (r *roundRobinBalancer) Length() int {
 	return len(r.servers)
 }
 
+// Name returns the name of this LoadBalancer.
+func (r *roundRobinBalancer) Name() string {
+	return "Stargate/RoundRobin"
+}
+
 // RoundRobin creates new instance of LoadBalancer that implements the Round-Robin load balancing algorithm.
 func RoundRobin(svc []string, director DirectorFunc) (LoadBalancer, error) {
 	r := &roundRobinBalancer{}
@@ -33,10 +38,10 @@ func RoundRobin(svc []string, director DirectorFunc) (LoadBalancer, error) {
 }
 
 func (r *roundRobinBalancer) createRoutes(svc []string, director DirectorFunc) error {
-	r.servers = []DownstreamServer{}
+	r.servers = []OriginServer{}
 
 	for _, s := range svc {
-		localServer, err := NewDownstreamServer(s, director)
+		localServer, err := NewOriginServer(s, director)
 		if err != nil {
 			return err
 		}

@@ -16,7 +16,7 @@ type MiddlewareFunc func(next http.Handler) http.Handler
 
 var errNoLister = errors.New("a lister is required")
 
-type downstreamRoute struct {
+type originRoute struct {
 	pathPrefix string
 	handler    http.Handler
 }
@@ -24,7 +24,7 @@ type downstreamRoute struct {
 // Router implements http.Handler and handles all requests that are to be reverse-proxied.
 type Router struct {
 	lister            ServiceLister
-	routes            []downstreamRoute
+	routes            []originRoute
 	loadBalancerMaker LoadBalancerMaker
 	middlewareFuncs   []MiddlewareFunc
 
@@ -40,7 +40,7 @@ func NewRouter(lister ServiceLister, options ...RouterOption) (*Router, error) {
 
 	router := &Router{
 		lister: lister,
-		routes: make([]downstreamRoute, 0),
+		routes: make([]originRoute, 0),
 		mut:    sync.RWMutex{},
 	}
 
@@ -68,7 +68,7 @@ func (r *Router) Reload() error {
 	}
 
 	mappedRoutes := make(map[string]struct{})
-	newRoutes := make([]downstreamRoute, 0)
+	newRoutes := make([]originRoute, 0)
 
 	for route, svc := range routes {
 
@@ -82,7 +82,7 @@ func (r *Router) Reload() error {
 		}
 
 		handler := r.createHandler(lb, r.middlewareFuncs...)
-		newRoutes = append(newRoutes, downstreamRoute{pathPrefix: route, handler: handler})
+		newRoutes = append(newRoutes, originRoute{pathPrefix: route, handler: handler})
 		mappedRoutes[route] = struct{}{}
 
 		Log.Debug("Route initialized - %s -> %s", route, svc)

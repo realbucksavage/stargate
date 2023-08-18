@@ -8,22 +8,22 @@ import (
 	"time"
 )
 
-type httpDownstream struct {
+type httpOriginServer struct {
 	url       string
 	backend   *httputil.ReverseProxy
 	alive     bool
 	lastAlive time.Time
 }
 
-func (h *httpDownstream) Address() string {
+func (h *httpOriginServer) Address() string {
 	return h.url
 }
 
-func (h *httpDownstream) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (h *httpOriginServer) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	h.backend.ServeHTTP(rw, r)
 }
 
-func (h *httpDownstream) Healthy(ctx context.Context) error {
+func (h *httpOriginServer) Healthy(ctx context.Context) error {
 	if time.Since(h.lastAlive).Seconds() < 30.0 {
 		return nil
 	}

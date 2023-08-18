@@ -1,3 +1,7 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/realbucksavage/stargate.svg)](https://pkg.go.dev/github.com/realbucksavage/stargate)
+[![codecov](https://codecov.io/gh/realbucksavage/stargate/branch/main/graph/badge.svg?token=QCRZ7IT8Y3)](https://codecov.io/gh/realbucksavage/stargate)
+[Report Card](https://www.goreportcard.com/report/github.com/realbucksavage/stargate)
+
 # Stargate
 
 A minimal and extensible library to build gateway servers. Stargate aims to be simple while providing niche solutions
@@ -7,7 +11,6 @@ Stargate supports:
 
 - WebSockets
 - Hot-reloading of routes
-- Eureka service registry (soon to be moved to `stargatecontrb`)
 - Middleware
 
 [stargatecontrb](https://github.com/realbucksavage/stargatecontrib) contains some middleware implementations that are
@@ -37,15 +40,7 @@ Check the [reloading routes example](./_examples/reloading_router/reload.go).
 
 #### Eureka service discovery
 
-`stargate.EurekaLister(string)` returns a `ServiceLister` instance that queries the specified eureka server for
-registered applications. Calling the `Reload()` method on `stargate.Proxy` instance causes the Eureka lister to query
-eureka server and update the routes.
-
-```go
-el := listers.Eureka("http://localhost:8761/eureka")
-```
-
-Check the [eureka service discovery example](./_examples/eureka/main.go).
+Check the [eureka package in stargatecontrib](https://github.com/realbucksavage/stargatecontrib/tree/main/lister/eureka).
 
 ### Middleware
 
@@ -66,4 +61,4 @@ Check the [middleware example](./_examples/middleware/main.go), that counts the 
 
 #### `LoadBalancer` implementations
 
-- Priority round robin
+- Priority round-robin

@@ -4,7 +4,7 @@ import "net/http"
 
 func serve(lb LoadBalancer) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var server DownstreamServer
+		var server OriginServer
 
 		if lb.Length() > 0 {
 			serverCount := 0
