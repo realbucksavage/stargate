@@ -71,7 +71,7 @@ func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Requ
 
 	destAddress := w.url
 	if cloned.URL.Path != "" {
-		destAddress = destAddress + "/" + cloned.URL.Path
+		destAddress = destAddress + cloned.URL.Path
 	}
 
 	downstreamConnection, downstreamResp, err := websocket.DefaultDialer.Dial(destAddress, requestHeader)
@@ -104,6 +104,7 @@ func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Requ
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
 		EnableCompression: true,
+		CheckOrigin:       func(*http.Request) bool { return true },
 	}
 
 	clientConn, err := upgrader.Upgrade(rw, req, upgradeHeader)
