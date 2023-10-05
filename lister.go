@@ -37,12 +37,8 @@ type HealthCheckOptions struct {
 	// HealthyStatus is the expected status code of a successful health check ping. Defaults to http.StatusOK.
 	HealthyStatus int
 
-	// HealthyPings represents the number of successful healthcheck calls that must succeed before an origin server is
-	// considered healthy.
-	HealthyPings int
-
 	// UnhealthyPings represents the number of unsuccessful healthcheck calls after which the origin server is deemed
-	// unhealthy.
+	// unhealthy. Once an origin is deemed unhealthy, it must pass UnhealthyPings pings to be considered healthy again.
 	UnhealthyPings int
 }
 
