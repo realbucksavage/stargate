@@ -64,24 +64,33 @@ func (origin *httpOriginServer) startHealthCheck(options *HealthCheckOptions) {
 	}
 
 	timeout := options.Timeout
-	if timeout == 0 {
+	if timeout <= 0 {
 		timeout = DefaultHealthCheckTimeout
+	}
+
+	unhealthyPings := options.UnhealthyPings
+	if unhealthyPings <= 0 {
+		unhealthyPings = DefaultUnhealthyPings
 	}
 
 	Log.Debug("pinging %q every %v at %q with a timeout of %v", origin.url, interval, path, timeout)
 	healthTicker := time.NewTicker(interval)
 	defer healthTicker.Stop()
 
+	counter := newHealthCounter(unhealthyPings)
 	origin.healthCheckRunning = true
 	for origin.healthCheckRunning {
 		err := origin.checkHealth(path, okStatus, timeout)
 
 		if err != nil {
 			Log.Error("%q: healthcheck failed: %v", origin.url, err)
+			counter.countUnhealthy()
+		} else {
+			counter.countHealthy()
 		}
 
 		origin.hcMut.Lock()
-		origin.alive = err == nil
+		origin.alive = counter.ok()
 		origin.hcMut.Unlock()
 
 		<-healthTicker.C

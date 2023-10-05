@@ -10,6 +10,8 @@ const (
 	DefaultHealthCheckStatus   = http.StatusOK
 	DefaultHealthCheckInterval = 30 * time.Second
 	DefaultHealthCheckTimeout  = 10 * time.Second
+	DefaultHealthyPings        = 3
+	DefaultUnhealthyPings      = 3
 )
 
 // RouteOptions defines the configuration of a route.
@@ -34,6 +36,14 @@ type HealthCheckOptions struct {
 
 	// HealthyStatus is the expected status code of a successful health check ping. Defaults to http.StatusOK.
 	HealthyStatus int
+
+	// HealthyPings represents the number of successful healthcheck calls that must succeed before an origin server is
+	// considered healthy.
+	HealthyPings int
+
+	// UnhealthyPings represents the number of unsuccessful healthcheck calls after which the origin server is deemed
+	// unhealthy.
+	UnhealthyPings int
 }
 
 // ServiceLister provides all available routes and their downstream services
