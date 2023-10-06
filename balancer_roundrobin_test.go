@@ -9,13 +9,13 @@ func TestRoundRobin(t *testing.T) {
 
 	maxServers := 3
 	backends := make([]*httptest.Server, maxServers)
-	backendAddreses := map[int]string{}
+	backendAddresses := map[int]string{}
 
 	for i := 1; i <= maxServers; i++ {
 		b := httptest.NewServer(namedHandler("x"))
 		backends[i-1] = b
 
-		backendAddreses[i] = "http://" + b.Listener.Addr().String()
+		backendAddresses[i] = "http://" + b.Listener.Addr().String()
 	}
 
 	lister := newLister(backends, "http")
@@ -24,7 +24,17 @@ func TestRoundRobin(t *testing.T) {
 		t.Fatalf("cannot list routes: %v", err)
 	}
 
-	lb, err := RoundRobin(routes, defaultDirector("/"))
+	servers := make([]OriginServer, 0)
+	for _, options := range routes {
+		server, err := NewOriginServer(options, defaultDirector("/"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		servers = append(servers, server)
+	}
+
+	lb, err := RoundRobin(servers)
 	if err != nil {
 		t.Fatalf("cannot create round robin balancer: %v", err)
 	}
@@ -32,8 +42,8 @@ func TestRoundRobin(t *testing.T) {
 	for i, j := 1, 1; i < 10; i++ {
 
 		sv := lb.NextServer()
-		if addr := sv.Address(); addr != backendAddreses[j] {
-			t.Fatalf("expected address for iteration %d to be %q, got %q", i, backendAddreses[j], addr)
+		if addr := sv.Address(); addr != backendAddresses[j] {
+			t.Fatalf("expected address for iteration %d to be %q, got %q", i, backendAddresses[j], addr)
 		}
 
 		j++

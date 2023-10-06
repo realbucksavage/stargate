@@ -1,7 +1,6 @@
 package stargate
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net"
@@ -16,9 +15,16 @@ type websocketOriginServer struct {
 	director func(*http.Request)
 }
 
-func (w *websocketOriginServer) Healthy(_ context.Context) error {
+func (w *websocketOriginServer) startHealthCheck(*HealthCheckOptions) {
 	// TODO: Implement websocket healthchecks
+}
+
+func (w *websocketOriginServer) Close() error {
 	return nil
+}
+
+func (w *websocketOriginServer) Healthy() bool {
+	return true
 }
 
 func (w *websocketOriginServer) Address() string {

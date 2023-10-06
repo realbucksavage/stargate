@@ -19,6 +19,7 @@ var errNoLister = errors.New("a lister is required")
 type originRoute struct {
 	pathPrefix string
 	handler    http.Handler
+	servers    []OriginServer
 }
 
 // Router implements http.Handler and handles all requests that are to be reverse-proxied.
@@ -70,27 +71,38 @@ func (r *Router) Reload() error {
 	mappedRoutes := make(map[string]struct{})
 	newRoutes := make([]originRoute, 0)
 
-	for route, svc := range routes {
+	for route, routeOptions := range routes {
 
 		if _, ok := mappedRoutes[route]; ok {
 			return errors.Errorf("route %q is already mapped", route)
 		}
 
-		lb, err := r.loadBalancerMaker(svc, defaultDirector(route))
+		servers := make([]OriginServer, 0)
+		for _, routeOption := range routeOptions {
+			sv, err := NewOriginServer(routeOption, defaultDirector(route))
+			if err != nil {
+				return errors.Wrapf(err, "cannot create an origin server pointing to %q for route %q", routeOption.Address, route)
+			}
+
+			servers = append(servers, sv)
+		}
+
+		lb, err := r.loadBalancerMaker(servers)
 		if err != nil {
-			return errors.Wrapf(err, "cannot create load balancer to downstream service %q", svc)
+			return errors.Wrapf(err, "cannot create load balancer for route %q", route)
 		}
 
 		handler := r.createHandler(lb, r.middlewareFuncs...)
-		newRoutes = append(newRoutes, originRoute{pathPrefix: route, handler: handler})
+		newRoutes = append(newRoutes, originRoute{pathPrefix: route, handler: handler, servers: servers})
 		mappedRoutes[route] = struct{}{}
 
-		Log.Debug("Route initialized - %s -> %s", route, svc)
+		Log.Debug("Route initialized - %s -> %s", route, routeOptions)
 	}
 
 	sort.SliceStable(newRoutes, func(i, j int) bool { return newRoutes[i].pathPrefix > newRoutes[j].pathPrefix })
 
 	r.mut.Lock()
+	defer closeServers(r.routes)
 	r.routes = newRoutes
 	r.mut.Unlock()
 
@@ -130,4 +142,14 @@ func (r *Router) createHandler(lb LoadBalancer, mwf ...MiddlewareFunc) http.Hand
 	}
 
 	return handler
+}
+
+func closeServers(routes []originRoute) {
+	for i := range routes {
+		for _, server := range routes[i].servers {
+			if err := server.Close(); err != nil {
+				Log.Warn("cannot close origin server %q: %v", server.Address(), err)
+			}
+		}
+	}
 }
