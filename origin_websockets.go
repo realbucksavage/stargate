@@ -103,6 +103,7 @@ func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Requ
 	if hdr := downstreamResp.Header.Get("Sec-Websocket-Protocol"); hdr != "" {
 		upgradeHeader.Set("Sec-Websocket-Protocol", hdr)
 	}
+
 	if hdr := downstreamResp.Header.Get("Set-Cookie"); hdr != "" {
 		upgradeHeader.Set("Set-Cookie", hdr)
 	}
@@ -111,6 +112,7 @@ func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Requ
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
 		EnableCompression: true,
+		CheckOrigin:       func(r *http.Request) bool { return true },
 	}
 
 	clientConn, err := upgrader.Upgrade(rw, req, upgradeHeader)
