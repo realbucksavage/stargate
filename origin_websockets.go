@@ -89,8 +89,9 @@ func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Requ
 			}
 		} else {
 			http.Error(rw, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
-			return
 		}
+
+		return
 	}
 	defer func() {
 		if err := downstreamConnection.Close(); err != nil {
