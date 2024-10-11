@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -75,12 +76,19 @@ func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Requ
 	cloned := req.Clone(req.Context())
 	w.director(cloned)
 
-	destAddress := w.url
-	if cloned.URL.Path != "" {
-		destAddress = destAddress + cloned.URL.Path
+	destAddress, err := url.Parse(w.url)
+	if err != nil {
+		Log.Error("cannot parse %q as a valid URL", w.url)
+		return
 	}
 
-	downstreamConnection, downstreamResp, err := websocket.DefaultDialer.Dial(destAddress, requestHeader)
+	if cloned.URL.Path != "" {
+		destAddress.Path += cloned.URL.Path
+	}
+
+	destAddress.RawQuery = combineQueries(destAddress, cloned.URL)
+
+	downstreamConnection, downstreamResp, err := websocket.DefaultDialer.Dial(destAddress.String(), requestHeader)
 	if err != nil {
 		Log.Debug("cannot connect to downstream server: %v", err)
 		if downstreamResp != nil {
