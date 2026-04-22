@@ -143,7 +143,7 @@ func (w *websocketOriginServer) ServeHTTP(rw http.ResponseWriter, req *http.Requ
 	}
 
 	if e, ok := err.(*websocket.CloseError); !ok || e.Code == websocket.CloseAbnormalClosure {
-		Log.Error(message, err)
+		Log.Debug(message, err)
 	}
 }
 
@@ -169,7 +169,7 @@ func replicateWebsocketConnection(dest, src *websocket.Conn, errs chan error, al
 
 		err = dest.WriteMessage(msgType, msg)
 		if err != nil {
-			Log.Error("write error:: %s:: %v", alias, err)
+			Log.Debug("write error:: %s:: %v", alias, err)
 			errs <- err
 			break
 		}
