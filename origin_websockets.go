@@ -161,7 +161,7 @@ func replicateWebsocketConnection(dest, src *websocket.Conn, errs chan error, al
 
 			errs <- err
 			if err := dest.WriteMessage(websocket.CloseMessage, m); err != nil {
-				Log.Warn("error write error:: %s:: %v", alias, err)
+				Log.Debug("error write error:: %s:: %v", alias, err)
 			}
 
 			break
